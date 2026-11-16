@@ -57,6 +57,8 @@ Superpowers 将一套开发工作流打包给多个编程助手使用。各宿�
 
 其他宿主的安装命令和入口见 [README 的安装章节](README.md#installation)和[宿主移植指南](docs/porting-to-a-new-harness.md)。
 
+在同一台机器保留多个开发版本时，见[本地安装多个 Superpowers 开发版本](docs/local-development-installation.md)。
+
 ### 发布、测试与设计文档
 
 - 根目录 `scripts/` 用于版本维护、Shell 检查及 Codex 发布打包和同步，`assets/` 存放插件图标。 [维护脚本](scripts/) · [版本字段清单](.version-bump.json)
