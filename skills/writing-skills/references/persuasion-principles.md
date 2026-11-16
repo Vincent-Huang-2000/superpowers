@@ -1,187 +1,148 @@
-# Persuasion Principles for Skill Design
+# 技能设计中的说服原则
 
-## Overview
+## 概览
 
-LLMs respond to the same persuasion principles as humans. Understanding this psychology helps you design more effective skills - not to manipulate, but to ensure critical practices are followed even under pressure.
+适用于人类的说服原则也会影响大语言模型。理解背后的心理机制，可以把技能写得更有效，让关键实践在压力下也得到遵守。运用这些原则时，要以用户的真实利益为出发点。
 
-**Research foundation:** Meincke et al. (2025) tested 7 persuasion principles with N=28,000 AI conversations. Persuasion techniques more than doubled compliance rates (33% → 72%, p < .001).
+Meincke 等人（2025）在 N=28,000 次 AI 对话中测试了 7 种说服原则。使用说服技巧后，遵从率提高了一倍以上（33% → 72%，p < .001）。
 
-## The Seven Principles
+## 七项原则
 
-### 1. Authority
-**What it is:** Deference to expertise, credentials, or official sources.
+### 1. 权威
 
-**How it works in skills:**
-- Imperative language: "YOU MUST", "Never", "Always"
-- Non-negotiable framing: "No exceptions"
-- Eliminates decision fatigue and rationalization
+模型会尊重专业知识、资质或官方来源。
 
-**When to use:**
-- Discipline-enforcing skills (TDD, verification requirements)
-- Safety-critical practices
-- Established best practices
+可以用「你必须」「绝不」「始终」等命令式措辞，并用「没有例外」表明要求没有商量余地。这能减少决策疲劳，避免代理找借口。
 
-**Example:**
+适用于约束行为的技能（如 TDD 或强制验证）、关乎安全的实践，以及公认的最佳实践。
+
 ```markdown
-✅ Write code before test? Delete it. Start over. No exceptions.
-❌ Consider writing tests first when feasible.
+✅ 在测试之前写了代码？删除它，从头开始。没有例外。
+❌ 可行时，考虑先写测试。
 ```
 
-### 2. Commitment
-**What it is:** Consistency with prior actions, statements, or public declarations.
+### 2. 承诺
 
-**How it works in skills:**
-- Require announcements: "Announce skill usage"
-- Force explicit choices: "Choose A, B, or C"
-- Use tracking: todos for checklists
+代理倾向于与先前的行动、表态或公开声明保持一致。
 
-**When to use:**
-- Ensuring skills are actually followed
-- Multi-step processes
-- Accountability mechanisms
+可以要求代理声明「将使用某项技能」，明确选择 A、B 或 C，并为检查清单建立待办来追踪进展。
 
-**Example:**
+适用于确保代理实际遵守技能、多步骤流程和落实责任的机制。
+
 ```markdown
-✅ When you find a skill, you MUST announce: "I'm using [Skill Name]"
-❌ Consider letting your partner know which skill you're using.
+✅ 找到适用的技能后，必须说「我正在使用 [Skill Name]」。
+❌ 可以考虑告诉协作者你在使用哪项技能。
 ```
 
-### 3. Scarcity
-**What it is:** Urgency from time limits or limited availability.
+### 3. 稀缺
 
-**How it works in skills:**
-- Time-bound requirements: "Before proceeding"
-- Sequential dependencies: "Immediately after X"
-- Prevents procrastination
+时间限制或可用资源有限会带来紧迫感。
 
-**When to use:**
-- Immediate verification requirements
-- Time-sensitive workflows
-- Preventing "I'll do it later"
+用「继续之前」设定完成时限，或用「X 完成后立即执行」建立顺序依赖，防止拖延。
 
-**Example:**
+适用于必须立即验证、受时间限制的工作流程，以及需要防止「稍后再做」的场景。
+
 ```markdown
-✅ After completing a task, IMMEDIATELY request code review before proceeding.
-❌ You can review code when convenient.
+✅ 完成任务后，立即请求代码审查，再继续下一步。
+❌ 方便时可以做代码审查。
 ```
 
-### 4. Social Proof
-**What it is:** Conformity to what others do or what's considered normal.
+### 4. 社会认同
 
-**How it works in skills:**
-- Universal patterns: "Every time", "Always"
-- Failure modes: "X without Y = failure"
-- Establishes norms
+代理倾向于遵循他人的做法，或遵循被视为常态的做法。
 
-**When to use:**
-- Documenting universal practices
-- Warning about common failures
-- Reinforcing standards
+用「每次」「始终」说明普遍做法，用「做 X 而漏掉 Y 就会失败」说明常见失误，从而建立规范。
 
-**Example:**
+适用于记录通用做法、提醒常见失误及强化标准。
+
 ```markdown
-✅ Checklists without todo tracking = steps get skipped. Every time.
-❌ Some people find a todo list helpful for checklists.
+✅ 只要没有待办追踪检查清单，就会漏掉步骤。每次都是如此。
+❌ 有些人觉得用待办追踪检查清单很有帮助。
 ```
 
-### 5. Unity
-**What it is:** Shared identity, "we-ness", in-group belonging.
+### 5. 共同身份
 
-**How it works in skills:**
-- Collaborative language: "our codebase", "we're colleagues"
-- Shared goals: "we both want quality"
+共同的身份能带来「我们是同一团队」的归属感。
 
-**When to use:**
-- Collaborative workflows
-- Establishing team culture
-- Non-hierarchical practices
+用「我们的代码库」「我们是同事」等协作措辞，或强调「我们都希望把质量做好」等共同目标。
 
-**Example:**
+适用于协作流程、建立团队文化及不依赖层级关系的做法。
+
 ```markdown
-✅ We're colleagues working together. I need your honest technical judgment.
-❌ You should probably tell me if I'm wrong.
+✅ 我们是一起工作的同事。我需要你坦率地给出技术判断。
+❌ 如果我错了，你大概应该告诉我。
 ```
 
-### 6. Reciprocity
-**What it is:** Obligation to return benefits received.
+### 6. 互惠
 
-**How it works:**
-- Use sparingly - can feel manipulative
-- Rarely needed in skills
+收到好处后，代理会觉得有义务回报。
 
-**When to avoid:**
-- Almost always (other principles more effective)
+技能很少需要这一原则。它容易让人觉得受到操控，因此应谨慎使用。几乎所有情况下都应避免，其他原则效果更好。
 
-### 7. Liking
-**What it is:** Preference for cooperating with those we like.
+### 7. 喜好
 
-**How it works:**
-- **DON'T USE for compliance**
-- Conflicts with honest feedback culture
-- Creates sycophancy
+代理更愿意与自己喜欢的对象合作。
 
-**When to avoid:**
-- Always for discipline enforcement
+**不要用来要求代理遵守规则。** 它妨碍坦率反馈，容易导致迎合。凡是约束行为的场景，都应避免使用。
 
-## Principle Combinations by Skill Type
+## 按技能类型组合原则
 
-| Skill Type | Use | Avoid |
-|------------|-----|-------|
-| Discipline-enforcing | Authority + Commitment + Social Proof | Liking, Reciprocity |
-| Guidance/technique | Moderate Authority + Unity | Heavy authority |
-| Collaborative | Unity + Commitment | Authority, Liking |
-| Reference | Clarity only | All persuasion |
+| 技能类型 | 采用 | 避免 |
+|---|---|---|
+| 约束行为 | 权威 + 承诺 + 社会认同 | 喜好、互惠 |
+| 指导或技术 | 适度的权威 + 共同身份 | 高强度的权威措辞 |
+| 协作 | 共同身份 + 承诺 | 权威、喜好 |
+| 参考 | 清晰表达 | 所有说服技巧 |
 
-## Why This Works: The Psychology
+## 背后的心理机制
 
-**Bright-line rules reduce rationalization:**
-- "YOU MUST" removes decision fatigue
-- Absolute language eliminates "is this an exception?" questions
-- Explicit anti-rationalization counters close specific loopholes
+**边界明确的规则，能减少找借口的空间。**
 
-**Implementation intentions create automatic behavior:**
-- Clear triggers + required actions = automatic execution
-- "When X, do Y" more effective than "generally do Y"
-- Reduces cognitive load on compliance
+- 「你必须」让代理无需反复权衡。
+- 绝对措辞让代理无需猜测当前情况是否例外。
+- 逐一针对具体借口的指引能堵住对应漏洞。
 
-**LLMs are parahuman:**
-- Trained on human text containing these patterns
-- Authority language precedes compliance in training data
-- Commitment sequences (statement → action) frequently modeled
-- Social proof patterns (everyone does X) establish norms
+**预先规定执行意图，能让代理在触发时直接行动。**
 
-## Ethical Use
+- 清晰的触发条件加上必做的动作，便于直接执行。
+- 「遇到 X 时，执行 Y」比「通常执行 Y」更有效。
+- 代理遵守规则所需的认知负担较小。
 
-**Legitimate:**
-- Ensuring critical practices are followed
-- Creating effective documentation
-- Preventing predictable failures
+**大语言模型具有类人的行为特点。**
 
-**Illegitimate:**
-- Manipulating for personal gain
-- Creating false urgency
-- Guilt-based compliance
+- 训练使用的人类文本中包含这些模式。
+- 训练数据中，权威措辞之后经常出现遵从行为。
+- 表态后采取相应行动的承诺模式频繁出现。
+- 「大家都做 X」之类的社会认同模式能确立规范。
 
-**The test:** Would this technique serve the user's genuine interests if they fully understood it?
+## 合乎伦理的使用方式
 
-## Research Citations
+可以用来确保关键实践得到遵守、编写有效的文档和预防可预见的失败。
+
+不得用来谋取私利、制造虚假紧迫感，或利用内疚迫使对方遵从。
+
+判断标准是，用户完全理解这种技巧后，是否会认为它服务于自己的真实利益。
+
+## 研究文献
 
 **Cialdini, R. B. (2021).** *Influence: The Psychology of Persuasion (New and Expanded).* Harper Business.
-- Seven principles of persuasion
-- Empirical foundation for influence research
+
+- 介绍七项说服原则。
+- 为影响力研究提供实证基础。
 
 **Meincke, L., Shapiro, D., Duckworth, A. L., Mollick, E., Mollick, L., & Cialdini, R. (2025).** Call Me A Jerk: Persuading AI to Comply with Objectionable Requests. University of Pennsylvania.
-- Tested 7 principles with N=28,000 LLM conversations
-- Compliance increased 33% → 72% with persuasion techniques
-- Authority, commitment, scarcity most effective
-- Validates parahuman model of LLM behavior
 
-## Quick Reference
+- 在 N=28,000 次大语言模型对话中测试了 7 项说服原则。
+- 采用说服技巧后，遵从率从 33% 提高到 72%。
+- 权威、承诺和稀缺最有效。
+- 支持大语言模型的类人行为模型。
 
-When designing a skill, ask:
+## 快速参考
 
-1. **What type is it?** (Discipline vs. guidance vs. reference)
-2. **What behavior am I trying to change?**
-3. **Which principle(s) apply?** (Usually authority + commitment for discipline)
-4. **Am I combining too many?** (Don't use all seven)
-5. **Is this ethical?** (Serves user's genuine interests?)
+设计技能时，问自己：
+
+1. 属于哪类技能？约束行为、提供指引，还是供人参考？
+2. 希望改变哪种行为？
+3. 哪些原则适用？约束行为的技能通常适合权威和承诺。
+4. 组合的原则是否太多？避免把七项全部用上。
+5. 这种做法是否合乎伦理，是否服务于用户的真实利益？

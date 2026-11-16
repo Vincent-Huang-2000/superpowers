@@ -1,29 +1,11 @@
-# Claude Code Tool Notes
+# Claude Code 工具说明
 
-Claude Code is the reference harness: skills speak its vocabulary
-(`Agent` for a subagent dispatch, todos, `Skill`). These notes cover the
-one place Claude Code can run a plan cheaper than the skills' default
-shape. It is opt-in by your human partner and changes nothing the skills
-require.
+Claude Code 是技能使用的参考宿主。技能沿用该宿主的术语，例如用 `Agent` 派发子代理，用待办记录任务，以及使用 `Skill`。以下方式可以降低执行计划的成本，由用户选择启用，并继续遵循技能原有的要求。
 
-## Cheaper orchestration for subagent-driven development
+## 降低子代理驱动开发的协调成本
 
-The controller session is the most expensive seat in a
-superpowers:subagent-driven-development run: it reads every dispatch
-result and every report, and it usually runs on the session's most
-capable model. Claude Code supports nested subagents (three layers below
-the main conversation by default; `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH`
-adjusts it), so the whole loop can run one layer down.
+执行 superpowers:subagent-driven-development 时，主控会话会读取每次派发的结果和报告，通常还在使用会话中能力最强的模型，因此成本最高。Claude Code 支持嵌套子代理，默认可在主会话下嵌套三层，由 `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` 调整。整个流程可以下移一层执行。
 
-When your human partner asks for it — or has said the session model is
-too expensive to spend on coordination — dispatch ONE orchestrator
-subagent on a mid-tier model with the plan path and the instruction to
-use superpowers:subagent-driven-development end to end. The orchestrator
-dispatches its own implementers and reviewers per that skill's Model
-Selection; the workspace and ledger live on disk, so nothing is lost to
-the extra layer. Its final message must carry the "Rulings I made" list
-verbatim — that list is how the decisions reach your human partner, and
-you relay it, not summarize it.
+当用户明确要求这样做，或已经表示当前会话模型的协调成本过高时，只派发**一个**使用中档模型的协调子代理，提供计划路径，要求它完整执行 superpowers:subagent-driven-development。协调子代理根据该技能的模型选择规则派发实施者和审查者。工作区和台账保存在磁盘上，可以跨层访问。它的最终消息必须原样包含 `Rulings I made`（裁定事项）清单。逐字转达清单，以便用户看到做过的决定。
 
-Do this only for a whole plan. Nesting a single task's dispatch buys
-nothing and adds a seat.
+仅对整个计划使用此方式。只为单项任务额外嵌套一层会多占一个代理名额。

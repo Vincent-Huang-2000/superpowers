@@ -133,7 +133,7 @@ def test_specific_behavior():
 
 ```bash
 git add tests/path/test.py src/path/file.py
-git commit -m "feat: add specific feature"
+git commit -m "feat: 实现具体功能"
 ```
 ````
 

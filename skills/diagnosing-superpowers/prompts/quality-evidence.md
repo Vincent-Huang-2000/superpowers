@@ -1,26 +1,11 @@
-Read `prompts/analyst-common.md` first; it gives your role, inputs,
-context-safety rules, and the return format. This file adds the dimension.
+先读 `prompts/analyst-common.md`，明确角色、输入、上下文保护规则和返回格式。本文件说明该分析维度的要求。
 
-Dimension: Quality evidence
+分析维度为质量证据。
 
-Judge the process against its own claims. This is not a code review; do
-not evaluate the code the session produced.
+依据会话作出的声明审查执行过程。代码质量不在这个维度的评估范围内。
 
-1. Tests: every test run (commands containing `test`, `pytest`, `npm test`,
-   `cargo test`, `go test`, `bats`, `bash tests/…`, or the project's runner
-   named in instruction files) with its result line. Report runs that
-   failed and what the assistant did next.
-2. Verification behind claims: find assistant text claiming done, fixed,
-   passing, verified, works, complete. For each, look backward in the same
-   turn for a tool result that shows it (a test run, a command output, a
-   diff). Report claims with no supporting result in that turn.
-3. Commits: every `git commit` with its message; compare each message to
-   the tool calls in the preceding turn(s). Report commits whose message
-   claims work that no tool call performed, and work performed that was
-   never committed when the agreed plan said it would be.
-4. Review feedback: where a reviewer (human or subagent) raised points,
-   find the response. Report points acknowledged but not acted on, and
-   points dismissed without a stated reason.
-5. Acceptance criteria: if the case file's problem statement or the
-   agreed plan states criteria, report each as met / not met /
-   not checked with the evidence line.
+1. **测试。** 找出每次测试运行及其结果行。包括包含 `test`、`pytest`、`npm test`、`cargo test`、`go test`、`bats`、`bash tests/…` 或指令文件指定的项目测试运行器的命令。报告失败的运行和助手随后采取的行动。
+2. **声明的核实。** 找到声称已做完、已修复、通过、已验证、可用或已完成的助手消息。针对每项声明，回查同一轮中更早出现的工具结果，例如测试运行、命令输出或差异。报告该轮中缺少结果支持的声明。
+3. **提交。** 找出每次 `git commit` 及提交消息，将各条消息与前几轮的工具调用对照。报告提交消息声称做了但没有工具调用实际完成的工作，以及按商定计划应提交但始终未提交的工作。
+4. **审查反馈。** 如果审查者（人工或子代理）提出了意见，找出回应。报告已确认收到但未处理的意见，以及未说明理由就否决的意见。
+5. **验收标准。** 如果案例文件的问题陈述或商定的计划中有标准，逐项报告 `met`（满足）、`not met`（未满足）或 `not checked`（未检查），并附上证据行。

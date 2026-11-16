@@ -1,198 +1,141 @@
-# Writing Good Tests
+# 编写高质量测试
 
-**Load this reference when:** writing or changing tests, adding mocks, or
-adding cleanup/helper methods for tests.
+**何时阅读** 编写或修改测试，添加 mock，或为测试增加清理方法及辅助函数时。
 
-## Overview
+## 概述
 
-A test exists to catch a specific break. Two principles govern everything
-here:
+测试要捕捉具体的行为故障。遵循两项原则。
 
-```
-1. Every test names the break it catches
-2. Every test exercises the real thing
+```text
+1. 每项测试都指出它能发现哪种故障
+2. 每项测试都执行实际要验证的组件或代码
 ```
 
-Strict TDD produces both naturally: a test written first and watched
-failing against real code has already proven it can fail, and only earns
-a mock when the real dependency proves slow or external.
+严格遵循 TDD 自然会满足这两项原则。先写测试，并亲自确认它在真实代码上失败，就能证明它确实能发现问题。只有确认真实依赖速度太慢或位于外部时，才对它使用 mock。
 
-## Principle 1: Name the Break
+## 原则 1：明确要发现的故障
 
-Before writing the test body, answer: **what production change should
-make this test fail — and is that change a bug or a decision?** A test
-earns its place by catching a wrong branch, missing side effect, wrong
-argument, boundary case, or broken contract.
+写测试主体前先回答：**生产代码发生哪种变化时，这项测试应该失败？这种变化属于缺陷还是有意作出的设计决定？** 测试可以捕捉分支用错、副作用缺失、参数有误、边界情况遗漏或接口约定被破坏。
 
-**Derive expectations independently.** Use literals and hand-checked
-fixtures; table-driven tests with literal `want` values are the preferred
-shape. An expectation computed by the code under test — or its helpers —
-passes no matter what that code does:
+**独立推导期望值。** 使用字面值和手工核对过的测试数据。优先使用表驱动测试，并把 `want` 写成字面值。如果期望值也由被测代码或其辅助函数算出，无论被测代码怎样实现，测试都能通过。
 
 ```typescript
-// ❌ Mirror assertion: the same builder computes both sides — always true
+// ❌ 镜像断言：等式两侧用同一个函数计算，结果始终相等
 const expected = buildSearchQuery({ tag: 'urgent' });
 expect(buildSearchQuery({ tag: 'urgent' })).toBe(expected);
 
-// ✅ Hand-derived literal
+// ✅ 手动推导字面值
 expect(buildSearchQuery({ tag: 'urgent' })).toBe('tag:"urgent"');
 ```
 
-**No change detectors.** If only intentional decisions can fail a test —
-a constant's value, exact message wording, private structure — it fires
-on redesign and sleeps through bugs. Test the behavior that depends on
-the decision: not `expect(MAX_RETRIES).toBe(5)` but "a failing call is
-retried 5 times and the 6th attempt never happens."
+**验证设计决定产生的行为。** 如果只有刻意改变常量、原样文案或私有结构才能让测试失败，测试只会在重新设计时报错，对缺陷却不敏感。以重试为例，验证「调用失败后重试 5 次，不会进行第 6 次重试」，避免直接断言 `expect(MAX_RETRIES).toBe(5)`。
 
-**Behavior, not text.** Asserting that a script, skill, or config
-contains an exact line proves only that the source is the source. Run
-scripts against controlled inputs and assert outputs, side effects, or
-exit codes. Documents that instruct agents are tested by the consuming
-agent's behavior (superpowers:writing-skills); prose for humans earns no
-test at all.
+**执行制品并检查效果。** 断言脚本、技能或配置含有某一行，只能证明源文件含有该行。让脚本处理受控输入，断言其输出、副作用或退出码。对代理的指令，观察实际读取指令的代理会怎么做（superpowers:writing-skills）。面向人的说明文字无需测试。
 
-**Your code, not the framework.** Test the contract your code makes at
-its boundaries — the route you register, the query you emit, the payload
-you produce. Upstream mechanics are their maintainers' tests to write
-(the classic: asserting your router invokes a registered handler — that
-is the framework's test, not yours). When upstream behavior genuinely
-surprised you, write one narrow characterization test naming the
-assumption. The same boundary applies inside your code: constructors,
-getters, constants, and trivial forwarding earn tests only when they
-validate, normalize, default, derive, enforce, or cause side effects —
-otherwise assert the first consumer-visible result that depends on them.
+**验证自己代码的边界约定。** 例如注册了哪个路由、发出了什么查询、生成了什么载荷。框架的内部机制由其维护者测试，例如调度到已注册的路由处理器。若上游行为确实出乎意料，写一个范围小的特征测试，明确所依赖的假设。同样的边界也适用于自己的代码。构造函数、getter、常量和简单转发只有在负责校验、规范化、提供默认值、派生结果、执行约束或产生副作用时，才值得直接测试。其他情况直接断言调用者能观察到的第一个相关结果。
 
-### Gate Function
+### 编写测试前的检查
 
-```
-BEFORE writing the test body:
-  Name the production change that would make this test fail.
+```text
+写测试主体之前，明确哪种生产代码变化会让这项测试失败。
 
-  Cannot name one            → redesign around an observable behavior
-  "The source text changed"  → run the artifact and assert its effects
-  Only intentional decisions → change detector; test the behavior
-                               that depends on the decision
+举不出任何变化           → 围绕可观察行为重新设计
+「源文本改了」           → 执行制品，断言其效果
+仅在有意改变决定时失败   → 测试依赖该决定的行为
 
-  Confirm the expected value is derived without the code under test.
-  IF it reuses the code's logic or helpers:
-    Replace it with a literal or hand-checked fixture
+确认期望值的推导过程独立于被测代码。
+如复用了被测代码的逻辑或辅助函数，改用字面值或手工核对过的测试数据。
 ```
 
-## Principle 2: Exercise the Real Thing
+## 原则 2：执行被测对象
 
-**The mock earns no assertions.** A mock assertion passes when the mock
-is present and fails when it is absent — it says nothing about the
-component. Assert the real component's behavior; if the mock is what you
-are checking, unmock it or delete the assertion.
+**断言聚焦实际组件的行为。** 断言 mock 是否存在，只会随 mock 的有无通过或失败。若断言检查的是 mock 本身，取消 mock 或删去该断言。
 
 ```typescript
-// ✅ Real behavior
+// ✅ 实际行为
 expect(screen.getByRole('navigation')).toBeInTheDocument();
 
-// ❌ Mock existence
+// ❌ mock 是否存在
 expect(screen.getByTestId('sidebar-mock')).toBeInTheDocument();
 ```
 
-**your human partner's correction:** "Are we testing the behavior of a
-mock?"
+**用户的提醒**「我们测的是 mock 的行为吗？」
 
-**Mock at the right level.** Learn every side effect of the real method
-before replacing it; mock the slow or external operation and keep what
-the test depends on real. When unsure, run the test against the real
-implementation first and observe what actually needs to happen.
+**在恰当的层级 mock。** 替换真实方法前，了解它的每个副作用。mock 缓慢或位于外部的操作，保留测试依赖的真实行为。不确定时，先用真实实现运行测试，观察到底需要发生什么。
 
 ```typescript
-// ❌ The mock swallows the config write that duplicate detection reads
+// ❌ mock 吞掉了查重逻辑所需的配置写入
 vi.mock('ToolCatalog', () => ({
   discoverAndCacheTools: vi.fn().mockResolvedValue(undefined)
 }));
 
-// ✅ Mock only the slow server startup; the config write stays real
+// ✅ 只 mock 耗时的服务器启动，保留真实的配置写入
 vi.mock('MCPServerManager');
 ```
 
-**Make doubles specific.** When arguments, call counts, or ordering are
-part of the contract, assert them — a fake that accepts anything verifies
-nothing. Give each branch (success, error, malformed) its own fixture or
-spy, so the wrong branch cannot satisfy the expectation.
+**具体设置测试替身。** 如果参数、调用次数或顺序属于接口约定，就断言这些内容。接受任意参数的替身无法验证约定。为成功、错误和格式不合法的分支分别准备测试数据或 spy，避免错误分支也能满足期望。
 
-**Mirror real data completely.** Mock the complete structure as it exists
-in reality — all documented fields — not just the ones your test reads.
-Partial mocks fail silently when downstream code reads an omitted field:
-the test passes while integration breaks.
+**完整模拟真实数据结构。** mock 数据应包含文档中定义的全部字段，即使当前测试只读取其中一部分。否则，下游读取缺失字段时，测试可能照样通过，集成却会失败。
 
-**Production classes carry production methods only.** Cleanup that only
-tests need lives in test utilities, never as a `destroy()` on the
-production class. Ask: is this method called only from tests? Does this
-class own this resource's lifecycle? Wrong answers → test utility.
+**生产类只提供生产所需的方法。** 仅测试需要的清理方法应放到测试工具中，避免在生产类上添加 `destroy()`。检查是否只有测试会调用该方法，以及该类是否负责资源的生命周期。属于测试辅助职责时，将其放进测试工具。
 
-**Prefer real components over complex mocks.** When mock setup outgrows
-the test logic, mocks miss methods the real components have, or tests
-break when the mock changes, switch to an integration test with real
-components. **your human partner's question:** "Do we need to be using a
-mock here?"
+**复杂 mock 可改用真实组件。** 如果 mock 的设置比测试逻辑还长、mock 缺少真实组件的方法，或修改 mock 就会导致测试失败，改用真实组件做集成测试。**用户的问题**「这里有必要用 mock 吗？」
 
-### Gate Function
+### 增加 mock 或辅助函数前的检查
 
-```
-BEFORE adding a mock or test helper:
-  List the real method's side effects; keep the ones the test
-  depends on real — mock the slow/external level below them.
+```text
+添加 mock 或测试辅助函数之前：
 
-  Mock responses mirror the complete real structure.
+  列出真实方法的副作用。保留测试依赖的部分，在更底层 mock 缓慢或位于外部的操作。
 
-  A method only tests call lives in test utilities, not production.
+  让 mock 响应包含真实结构的全部字段。
 
-  About to assert on the mock itself?
-    Unmock it or delete the assertion.
+  将仅由测试调用的方法放在测试工具中。
+
+  如果正准备断言 mock 本身，取消 mock 或删除该断言。
 ```
 
-## Tests Ship With the Implementation
+## 测试随实现一并交付
 
-The TDD cycle — failing test, minimal implementation, refactor — is what
-"complete" means. Ship the tests the behavior needs and only those:
-trivial code and human prose earn none, and a test written to satisfy
-process costs maintenance forever.
+完成 TDD 循环才算完成工作：先写失败的测试，再做最小实现，最后重构。只交付行为所需的测试。简单直白的代码和面向人的说明无需专设测试。为走流程而编写的测试会持续产生维护成本。
 
-## The Mutation Check
+## 变异检查
 
-Before finishing, mentally mutate the production code; at least one test
-should fail for each realistic mutation:
+收尾前，设想生产代码出现以下改动。每一种现实中可能发生的改动，都应至少让一项测试失败。
 
-- Wrong constant or argument
-- Wrong branch handler
-- Missing state change or side effect
-- Empty or default return
-- Missing validation for zero, empty, nil, unauthorized, or malformed input
+- 常量或参数错误
+- 调用了错误分支的处理函数
+- 遗漏状态变更或副作用
+- 返回空值或默认值
+- 漏掉对零值、空值、`nil`、无权限输入或非法格式的检查
 
-A mutation nothing catches marks the behavior as unprotected — or the
-test as tautological.
+如果没有测试能捕捉某种改动，说明该行为缺少保护，或测试只验证了一个恒成立的条件。
 
-## Quick Reference
+## 速查
 
-| When you... | Do |
-|-------------|-----|
-| Write any test | Name the break it catches — a bug, not a decision |
-| Build an expected value | Derive it by hand; never with the code under test |
-| Test a script or document | Run it / pressure-test its consumer; never grep its text |
-| Reach for a dependency test | Test your boundary contract, not their documented mechanics |
-| Want to assert on a mocked element | Test the real component, or unmock it |
-| Are about to mock a method | Learn its side effects; mock the slow/external level |
-| Build a mock response | Mirror the real structure completely |
-| Need cleanup only tests use | Put it in test utilities |
-| Watch mock setup balloon | Switch to an integration test with real components |
-| Finish a test file | Run the mutation check |
+| 场景 | 做法 |
+| --- | --- |
+| 编写任何测试 | 明确它捕捉的实际故障 |
+| 构造期望值 | 手动推导，避免使用被测代码计算 |
+| 测试脚本或指令文档 | 运行脚本，或通过压力场景观察读取指令的代理 |
+| 考虑测试依赖库 | 验证自己代码的边界约定 |
+| 想断言某个模拟元素 | 测试真实组件，或取消 mock |
+| 准备 mock 一个方法 | 了解它的副作用，只 mock 缓慢或外部的部分 |
+| 构造 mock 响应 | 完整模拟真实结构 |
+| 只有测试需要清理 | 把清理代码放到测试工具中 |
+| mock 设置越来越复杂 | 改用真实组件做集成测试 |
+| 写完测试文件 | 做变异检查 |
 
-## Warning Signs
+## 警示信号
 
-- Setup and assertion share the same object, guaranteeing equality
-- The test can fail only through a panic, crash, or missing selector
-- The test fails on every intentional change, never on accidental breakage
-- Expected values are hidden behind loops, builders, or helpers
-- The test greps source text, or asserts a removed symbol stays removed
-- The test would still matter if only the framework remained
-- The test exists for coverage, checking no side effect or outcome
-- An assertion checks a `*-mock` test ID, or fails if you remove the mock
-- A method is called only from test files
-- Mock setup is more than half the test, or you can't explain why the mock is needed
-- Mocking "just to be safe"
+- 测试准备和断言共用同一个对象，结果保证相等。
+- 只有 panic、崩溃或找不到选择器时，测试才会失败。
+- 每次有意修改都会导致测试失败，意外故障却无法触发失败。
+- 期望值藏在循环、构造器或辅助函数里。
+- 测试搜索源文本，或断言一个已删除的符号仍然不存在。
+- 只剩框架代码时，这项测试依然适用。
+- 测试只为覆盖率，未检查任何副作用或输出。
+- 断言检查 `*-mock` 测试 ID，或只因取消 mock 就失败。
+- 某个生产方法仅在测试文件中调用。
+- mock 设置占了测试一半以上，或说不清为什么需要 mock。
+- 「保险起见」而使用 mock。

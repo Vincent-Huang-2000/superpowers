@@ -1,74 +1,81 @@
-# Root Cause Tracing
+# 根因追踪
 
-## Overview
+## 概述
 
-Bugs often manifest deep in the call stack (git init in wrong directory, file created in wrong location, database opened with wrong path). Your instinct is to fix where the error appears, but that's treating a symptom.
+缺陷常在调用栈深处暴露，例如 `git init` 在错误目录运行、文件创建到错误位置或数据库使用了错误路径。在报错处动手只能处理眼前的症状。
 
-**Core principle:** Trace backward through the call chain until you find the original trigger, then fix at the source.
+**核心原则** 沿调用链逆向追踪，找到原始触发点后在源头修复。
 
-## When to Use
+## 何时使用
 
 ```dot
 digraph when_to_use {
-    "Bug appears deep in stack?" [shape=diamond];
-    "Can trace backwards?" [shape=diamond];
-    "Fix at symptom point" [shape=box];
-    "Trace to original trigger" [shape=box];
-    "BETTER: Also add defense-in-depth" [shape=box];
+    "缺陷出现在调用栈深处？" [shape=diamond];
+    "能逆向追踪？" [shape=diamond];
+    "在症状出现处修复" [shape=box];
+    "追到原始触发点" [shape=box];
+    "更好的做法：补上纵深防御" [shape=box];
 
-    "Bug appears deep in stack?" -> "Can trace backwards?" [label="yes"];
-    "Can trace backwards?" -> "Trace to original trigger" [label="yes"];
-    "Can trace backwards?" -> "Fix at symptom point" [label="no - dead end"];
-    "Trace to original trigger" -> "BETTER: Also add defense-in-depth";
+    "缺陷出现在调用栈深处？" -> "能逆向追踪？" [label="是"];
+    "能逆向追踪？" -> "追到原始触发点" [label="是"];
+    "能逆向追踪？" -> "在症状出现处修复" [label="否，追踪中断"];
+    "追到原始触发点" -> "更好的做法：补上纵深防御";
 }
 ```
 
-**Use when:**
-- Error happens deep in execution (not at entry point)
-- Stack trace shows long call chain
-- Unclear where invalid data originated
-- Need to find which test/code triggers the problem
+- 错误出现在执行过程深处，距离入口很远。
+- 堆栈显示调用链很长。
+- 无法确定无效数据的来源。
+- 需要找出触发问题的测试或代码。
 
-## The Tracing Process
+## 追踪过程
 
-### 1. Observe the Symptom
-```
+### 1. 观察症状
+
+```text
 Error: git init failed in ~/project/packages/core
 ```
 
-### 2. Find Immediate Cause
-**What code directly causes this?**
+### 2. 找到直接原因
+
+**哪段代码直接触发了错误？**
+
 ```typescript
 await execFileAsync('git', ['init'], { cwd: projectDir });
 ```
 
-### 3. Ask: What Called This?
-```typescript
+### 3. 查看调用方
+
+```text
 WorktreeManager.createSessionWorktree(projectDir, sessionId)
-  → called by Session.initializeWorkspace()
-  → called by Session.create()
-  → called by test at Project.create()
+  ← Session.initializeWorkspace() 调用
+  ← Session.create() 调用
+  ← 测试在 Project.create() 处调用
 ```
 
-### 4. Keep Tracing Up
-**What value was passed?**
-- `projectDir = ''` (empty string!)
-- Empty string as `cwd` resolves to `process.cwd()`
-- That's the source code directory!
+### 4. 继续往上追踪
 
-### 5. Find Original Trigger
-**Where did empty string come from?**
+**当时传入的值是什么？**
+
+- `projectDir = ''`（空字符串）。
+- `cwd` 为空字符串时会解析成 `process.cwd()`。
+- 结果使用了源码目录。
+
+### 5. 找到原始触发点
+
+**空字符串从哪里来？**
+
 ```typescript
-const context = setupCoreTest(); // Returns { tempDir: '' }
-Project.create('name', context.tempDir); // Accessed before beforeEach!
+const context = setupCoreTest(); // 返回 { tempDir: '' }
+Project.create('name', context.tempDir); // 在 beforeEach 之前访问了 tempDir
 ```
 
-## Adding Stack Traces
+## 添加堆栈跟踪
 
-When you can't trace manually, add instrumentation:
+手动追踪困难时，加上调试记录。
 
 ```typescript
-// Before the problematic operation
+// 在有问题的操作前记录堆栈
 async function gitInit(directory: string) {
   const stack = new Error().stack;
   console.error('DEBUG git init:', {
@@ -82,88 +89,91 @@ async function gitInit(directory: string) {
 }
 ```
 
-**Critical:** Use `console.error()` in tests (not logger - may not show)
+**关键点** 在测试中用 `console.error()`，日志框架的输出可能会被隐藏。
 
-**Run and capture:**
+运行测试并捕获输出：
+
 ```bash
 npm test 2>&1 | grep 'DEBUG git init'
 ```
 
-**Analyze stack traces:**
-- Look for test file names
-- Find the line number triggering the call
-- Identify the pattern (same test? same parameter?)
+分析堆栈：
 
-## Finding Which Test Causes Pollution
+- 查找测试文件名。
+- 定位触发调用的行号。
+- 找出规律，例如反复出现的测试或参数。
 
-If something appears during tests but you don't know which test:
+## 确定哪个测试污染了环境
 
-Use the bisection script `find-polluter.sh` in this directory:
+测试期间出现意外文件却不清楚是哪个测试造成的，用同目录的 `find-polluter.sh` 逐项定位。
 
 ```bash
 bash ./find-polluter.sh '.git' 'src/**/*.test.ts'
 ```
 
-Runs tests one-by-one, stops at first polluter. See script for usage.
+脚本逐个运行测试，找到首个污染源后停止。用法见脚本。
 
-## Real Example: Empty projectDir
+## 实际案例：空的 projectDir
 
-**Symptom:** `.git` created in `packages/core/` (source code)
+**症状** `.git` 被创建在源码目录 `packages/core/` 中。
 
-**Trace chain:**
-1. `git init` runs in `process.cwd()` ← empty cwd parameter
-2. WorktreeManager called with empty projectDir
-3. Session.create() passed empty string
-4. Test accessed `context.tempDir` before beforeEach
-5. setupCoreTest() returns `{ tempDir: '' }` initially
+**调用链**
 
-**Root cause:** Top-level variable initialization accessing empty value
+1. `git init` 在 `process.cwd()` 中运行，因为 `cwd` 参数为空。
+2. `WorktreeManager` 收到了空的 `projectDir`。
+3. `Session.create()` 传入了空字符串。
+4. 测试在 `beforeEach` 前访问了 `context.tempDir`。
+5. `setupCoreTest()` 初始返回 `{ tempDir: '' }`。
 
-**Fix:** Made tempDir a getter that throws if accessed before beforeEach
+**根因** 顶层变量初始化时读取了尚未设置的值。
 
-**Also added defense-in-depth:**
-- Layer 1: Project.create() validates directory
-- Layer 2: WorkspaceManager validates not empty
-- Layer 3: NODE_ENV guard refuses git init outside tmpdir
-- Layer 4: Stack trace logging before git init
+**修复** 将 `tempDir` 改为 getter，若在 `beforeEach` 之前访问则抛出错误。
 
-## Key Principle
+**补充纵深防御**
+
+- 第 1 层。`Project.create()` 校验目录。
+- 第 2 层。`WorkspaceManager` 确认参数非空。
+- 第 3 层。通过 `NODE_ENV` 在测试中阻止在临时目录之外运行 `git init`。
+- 第 4 层。在 `git init` 前记录堆栈。
+
+## 修复原则
 
 ```dot
 digraph principle {
-    "Found immediate cause" [shape=ellipse];
-    "Can trace one level up?" [shape=diamond];
-    "Trace backwards" [shape=box];
-    "Is this the source?" [shape=diamond];
-    "Fix at source" [shape=box];
-    "Add validation at each layer" [shape=box];
-    "Bug impossible" [shape=doublecircle];
-    "NEVER fix just the symptom" [shape=octagon, style=filled, fillcolor=red, fontcolor=white];
+    "已发现直接原因" [shape=ellipse];
+    "还能沿调用链追上一层？" [shape=diamond];
+    "逆向追踪" [shape=box];
+    "这是源头吗？" [shape=diamond];
+    "在源头修复" [shape=box];
+    "在每一层添加校验" [shape=box];
+    "从结构上杜绝缺陷" [shape=doublecircle];
+    "绝不能只修症状" [shape=octagon, style=filled, fillcolor=red, fontcolor=white];
 
-    "Found immediate cause" -> "Can trace one level up?";
-    "Can trace one level up?" -> "Trace backwards" [label="yes"];
-    "Can trace one level up?" -> "NEVER fix just the symptom" [label="no"];
-    "Trace backwards" -> "Is this the source?";
-    "Is this the source?" -> "Trace backwards" [label="no - keeps going"];
-    "Is this the source?" -> "Fix at source" [label="yes"];
-    "Fix at source" -> "Add validation at each layer";
-    "Add validation at each layer" -> "Bug impossible";
+    "已发现直接原因" -> "还能沿调用链追上一层？";
+    "还能沿调用链追上一层？" -> "逆向追踪" [label="是"];
+    "还能沿调用链追上一层？" -> "绝不能只修症状" [label="否"];
+    "逆向追踪" -> "这是源头吗？";
+    "这是源头吗？" -> "逆向追踪" [label="否，继续"];
+    "这是源头吗？" -> "在源头修复" [label="是"];
+    "在源头修复" -> "在每一层添加校验";
+    "在每一层添加校验" -> "从结构上杜绝缺陷";
 }
 ```
 
-**NEVER fix just where the error appears.** Trace back to find the original trigger.
+**要修复报错，先向上追踪，找到原始触发点。**
 
-## Stack Trace Tips
+## 堆栈跟踪建议
 
-**In tests:** Use `console.error()` not logger - logger may be suppressed
-**Before operation:** Log before the dangerous operation, not after it fails
-**Include context:** Directory, cwd, environment variables, timestamps
-**Capture stack:** `new Error().stack` shows complete call chain
+- **测试中**使用 `console.error()`，日志框架的输出可能被隐藏。
+- **在有风险的操作之前**记录日志，以免失败后丢失现场。
+- **记录上下文**，包括目录、`cwd`、环境变量和时间戳。
+- **捕获堆栈**。`new Error().stack` 会显示完整调用链。
 
-## Real-World Impact
+## 实际效果
 
-From debugging session (2025-10-03):
-- Found root cause through 5-level trace
-- Fixed at source (getter validation)
-- Added 4 layers of defense
-- 1847 tests passed, zero pollution
+2025-10-03 的调试会话中：
+
+- 沿调用链向上追了 5 层，找到根因。
+- 在源头加入 getter 校验。
+- 添加了 4 层防御。
+- 1847 项测试通过，未再出现污染。

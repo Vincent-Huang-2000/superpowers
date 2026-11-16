@@ -1,23 +1,16 @@
-# Antigravity CLI (`agy`) Tool Mapping
+# Antigravity CLI（`agy`）工具映射
 
-Skills speak in actions ("dispatch a subagent", "create a todo", "read a file"). On the Antigravity CLI (`agy`) these resolve to the tools below.
+技能以「派发子代理」「创建待办」「读取文件」之类的操作描述流程。在 Antigravity CLI（`agy`）中使用下表所列的工具。
 
-| Action skills request | Antigravity CLI equivalent |
-|----------------------|----------------------|
-| Dispatch a subagent (`Subagent (general-purpose):` template) | `invoke_subagent` with a built-in `TypeName` — `self` for full-capability work, `research` for read-only |
-| Task tracking ("create a todo", "mark complete") | a **task artifact** — `write_to_file` with `IsArtifact: true` and `ArtifactType: "task"` (see [Task tracking](#task-tracking)). **Not** `manage_task`, which manages background processes. |
+| 技能要求的操作 | Antigravity CLI 对应工具 |
+| --- | --- |
+| 派发子代理（`Subagent (general-purpose):` 模板） | 使用 `invoke_subagent`，指定内置的 `TypeName`。完整权限用 `self`，只读任务用 `research`。 |
+| 跟踪任务（创建待办、标记完成） | 用 `write_to_file` 创建[任务工件](#task-tracking)，设置 `IsArtifact: true` 和 `ArtifactType: "task"`。`manage_task` 用于管理后台进程。 |
 
-## Task tracking
+<a id="task-tracking"></a>
 
-Antigravity has **no todo tool** (`manage_task` manages background
-processes — `list`/`kill`/`status`/`send_input` — it is *not* a checklist). When a
-skill says to create a todo list or track tasks, maintain a **task artifact**: a
-markdown checklist saved with `write_to_file` (`IsArtifact: true`,
-`ArtifactMetadata.ArtifactType: "task"`), edited with `replace_file_content` /
-`multi_replace_file_content` as you go.
+## 跟踪任务
 
-At the start of any multi-step task, create the task artifact listing every step of
-your plan. As you complete each step, edit the artifact to mark it done (`- [x]`).
-If the plan changes, update the checklist. Keep it current — it is your source of
-truth for what remains; once the conversation gets long, re-read it before starting
-each step.
+Antigravity 没有待办清单工具。`manage_task` 的 `list`、`kill`、`status` 和 `send_input` 操作用于管理后台进程。技能要求创建待办清单或跟踪任务时，用 `write_to_file` 保存 Markdown 清单作为**任务工件**，设置 `IsArtifact: true` 和 `ArtifactMetadata.ArtifactType: "task"`。进行中使用 `replace_file_content` 或 `multi_replace_file_content` 更新。
+
+开始多步骤任务时，创建任务工件，列出计划的每一步。完成一步就标记为完成（`- [x]`）。计划变更时更新清单，以清单为准确认剩余工作。对话较长时，每开始一步前重读清单。

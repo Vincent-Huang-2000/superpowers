@@ -1,22 +1,14 @@
-# Context safety for session transcripts
+# 读取会话记录时保护上下文
 
-One transcript record can exceed a megabyte or embed a whole history. Printing
-one whole record can overflow the context of the session doing the diagnosis.
-Every reader of a session file, controller or subagent, follows these rules for
-every file, every time.
+单条会话记录可能超过 1 MB，或嵌入整段会话历史。打印一条完整记录就可能使当前排查会话的上下文溢出。主代理和子代理每次读取任何会话文件时，都遵循以下规则。
 
-1. **Measure before reading.**
+1. **读取前先测量。**
 
    ```bash
    wc -lc "$F"
    awk '{ if (length($0) > 100000) print NR, length($0) }' "$F"   # long lines
    ```
 
-2. **Never `cat` or `grep` for content.** Get line numbers and counts
-   first (`grep -n … | cut -d: -f1`, `jq -r '.type' | sort | uniq -c`),
-   then small fields from specific lines (`sed -n Np | jq -c '{…}'` or
-   `| cut -c1-500`). Use the field-extraction commands established during
-   discovery for the source in front of you.
-3. **Narrow anything over 500 characters.** If a command returns more than
-   500 characters for one record, tighten the field or the slice.
-4. **Read-only.** Never modify, move, or delete a session file.
+2. **严禁用 `cat` 或 `grep` 输出正文。** 先取行号和计数（`grep -n … | cut -d: -f1`、`jq -r '.type' | sort | uniq -c`），再从指定行提取短字段（`sed -n Np | jq -c '{…}'` 或 `| cut -c1-500`）。使用定位会话时为当前来源确认过的字段提取命令。
+3. **把单条输出限制在 500 字符以内。** 如果某条记录的输出超过 500 字符，缩小字段或切片范围。
+4. **只读。** 严禁修改、移动或删除会话文件。

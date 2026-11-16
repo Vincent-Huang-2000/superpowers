@@ -123,7 +123,7 @@ superpowers:using-git-worktrees 创建隔离工作区或确认已有隔离。
 由新执行者根据同一份账本续接。
 
 - 每份计划有专属工作区。启动技能时，从正在执行计划的工作树里运行
-  `../subagent-driven-development/scripts/sdd-workspace PLAN_FILE`，使用脚本的绝对路径（by its absolute path）。
+  `../subagent-driven-development/scripts/sdd-workspace PLAN_FILE`，使用脚本的绝对路径。
   脚本会打印该计划专用、
   被 Git 忽略的目录
   （`<repo-root>/.superpowers/sdd/<plan-basename>/`），用来存放
@@ -171,7 +171,7 @@ superpowers:using-git-worktrees 创建隔离工作区或确认已有隔离。
 ### 1. 开始当前任务
 
 - 在正在执行计划的工作树里运行本技能的 `scripts/task-start PLAN_FILE N`，
-  使用脚本的绝对路径（by its absolute path）。它一次就会打印
+  使用脚本的绝对路径。它一次就会打印
   简报路径和 BASE（用于确定该任务提交范围的起点）。
   每个任务都要读取简报，包括准备阶段已经看过的任务。
   记忆只是摘要，简报里才有确切的取值、
@@ -224,7 +224,7 @@ superpowers:verification-before-completion。还有缺项时，先补齐再确�
 ### 4. 完成当前任务
 
 运行本技能的 `scripts/task-done PLAN_FILE N BASE -- <test command>`，
-使用脚本的绝对路径（by its absolute path），从正在执行计划的工作树里调用，并传入简报为整个任务指定的测试命令。
+使用脚本的绝对路径，从正在执行计划的工作树里调用，并传入简报为整个任务指定的测试命令。
 脚本运行测试，把完整输出保存在工作区并打印末尾，
 只有通过时才将下列完成记录追加到账本。
 
@@ -236,7 +236,7 @@ superpowers:verification-before-completion。还有缺项时，先补齐再确�
 ## 最终审查
 
 运行 `../subagent-driven-development/scripts/review-package PLAN_FILE MERGE_BASE HEAD`，
-使用脚本的绝对路径（by its absolute path），从正在执行计划的工作树调用。MERGE_BASE 是分支的起始提交，例如可用
+使用脚本的绝对路径，从正在执行计划的工作树调用。MERGE_BASE 是分支的起始提交，例如可用
 `git merge-base main HEAD` 取得。根据脚本打印的文件开始审查。
 
 **有子代理工具时** 审查整个分支需要独立判断，使用可用的最强模型
@@ -260,7 +260,7 @@ superpowers:verification-before-completion。还有缺项时，先补齐再确�
 支持合并。
 
 处理前先归类审查发现。审查者的严重性标签是参考，最终由你把关。
-「Declined to judge」列表也由你处理，
+「未作判断（Declined to judge）」列表也由你处理，
 逐条作出裁定并记入账本，做法与处理计划冲突相同。
 记录格式为 `Final: Ruling: <behavior the reviewer set aside> —
 <what a reasonable person using this software gets, and why that stands

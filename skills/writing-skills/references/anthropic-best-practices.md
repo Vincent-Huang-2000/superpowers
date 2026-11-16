@@ -1,38 +1,38 @@
-# Skill authoring best practices
+# 技能编写最佳实践
 
-> Learn how to write effective Skills that agents can discover and use successfully.
+> 学习如何编写代理能够发现并成功使用的技能。
 
-Good Skills are concise, well-structured, and tested with real usage. This guide provides practical authoring decisions to help you write Skills that agents can discover and use effectively.
+好的技能简洁、结构清晰，并经过实际使用检验。本指南说明编写时如何取舍，帮助你写出代理能发现并有效使用的技能。
 
-For conceptual background on how Skills work, see the [Skills overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview).
+有关技能如何运作的基本概念，见[技能概览](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)。
 
-## Core principles
+## 核心原则
 
-### Concise is key
+### 保持简洁
 
-The [context window](https://platform.claude.com/docs/en/build-with-claude/context-windows) is a public good. Your Skill shares the context window with everything else your agent needs to know, including:
+[上下文窗口](https://platform.claude.com/docs/en/build-with-claude/context-windows)是共享资源。技能需要与代理要知道的所有其他信息共用这个窗口，包括：
 
-* The system prompt
-* Conversation history
-* Other Skills' metadata
-* Your actual request
+* 系统提示词
+* 对话历史
+* 其他技能的元数据
+* 用户实际发出的请求
 
-Not every token in your Skill has an immediate cost. At startup, only the metadata (name and description) from all Skills is pre-loaded. Agents read SKILL.md only when the Skill becomes relevant, and read additional files only as needed. However, being concise in SKILL.md still matters: once an agent loads it, every token competes with conversation history and other context.
+技能占用的 token 并非都立即计入上下文。启动时只预加载所有技能的元数据（名称和描述）。当技能适用于任务时，代理才读取 SKILL.md，并按需读取附加文件。SKILL.md 仍应保持简洁，因为代理加载它之后，每个 token 都会与对话历史和其他上下文争夺空间。
 
-**Default assumption**: Agents are already very smart
+**默认假设**：代理已经具备很强的能力。
 
-Only add context agents don't already have. Challenge each piece of information:
+只补充代理尚不了解的背景。逐项问自己：
 
-* "Does the agent really need this explanation?"
-* "Can I assume the agent knows this?"
-* "Does this paragraph justify its token cost?"
+* 「代理真的需要这段说明吗？」
+* 「可以假设代理已经知道这一点吗？」
+* 「这段话值得占用这么多 token 吗？」
 
-**Good example: Concise** (approximately 50 tokens):
+**好的示例：简洁**（约 50 个 token，按英文原例计）：
 
 ````markdown  theme={null}
-## Extract PDF text
+## 提取 PDF 文本
 
-Use pdfplumber for text extraction:
+使用 pdfplumber 提取文本：
 
 ```python
 import pdfplumber
@@ -42,285 +42,279 @@ with pdfplumber.open("file.pdf") as pdf:
 ```
 ````
 
-**Bad example: Too verbose** (approximately 150 tokens):
+**不佳的示例：太冗长**（约 150 个 token，按英文原例计）：
 
 ```markdown  theme={null}
-## Extract PDF text
+## 提取 PDF 文本
 
-PDF (Portable Document Format) files are a common file format that contains
-text, images, and other content. To extract text from a PDF, you'll need to
-use a library. There are many libraries available for PDF processing, but we
-recommend pdfplumber because it's easy to use and handles most cases well.
-First, you'll need to install it using pip. Then you can use the code below...
+PDF（便携式文档格式）是一种常见文件格式，可包含文本、图像和其他内容。
+你需要用一个库从 PDF 中提取文本。有许多库可用于处理 PDF，这里推荐
+pdfplumber，因为它很好用，也能处理大多数情况。首先，需要用 pip 安装它。
+接下来可以使用以下代码……
 ```
 
-The concise version assumes the agent knows what PDFs are and how libraries work.
+简洁的版本假设代理知道 PDF 是什么，也知道库的基本用法。
 
-### Set appropriate degrees of freedom
+### 设定适当的自由度
 
-Match the level of specificity to the task's fragility and variability.
+操作越容易出错、做法越固定，指令就应越具体。
 
-**High freedom** (text-based instructions):
+**高自由度**（文字指引）
 
-Use when:
+适用于：
 
-* Multiple approaches are valid
-* Decisions depend on context
-* Heuristics guide the approach
+* 有多种可行做法。
+* 决策取决于上下文。
+* 可以依靠经验规则选择做法。
 
-Example:
+示例：
 
 ```markdown  theme={null}
-## Code review process
+## 代码审查流程
 
-1. Analyze the code structure and organization
-2. Check for potential bugs or edge cases
-3. Suggest improvements for readability and maintainability
-4. Verify adherence to project conventions
+1. 分析代码的结构和组织方式。
+2. 检查潜在缺陷及边缘情况。
+3. 提出改善可读性和可维护性的建议。
+4. 验证代码是否符合项目约定。
 ```
 
-**Medium freedom** (pseudocode or scripts with parameters):
+**中等自由度**（伪代码或带参数的脚本）
 
-Use when:
+适用于：
 
-* A preferred pattern exists
-* Some variation is acceptable
-* Configuration affects behavior
+* 有优先采用的模式。
+* 允许一定程度的变化。
+* 配置会影响行为。
 
-Example:
+示例：
 
 ````markdown  theme={null}
-## Generate report
+## 生成报告
 
-Use this template and customize as needed:
+使用以下模板，并按需调整：
 
 ```python
 def generate_report(data, format="markdown", include_charts=True):
-    # Process data
-    # Generate output in specified format
-    # Optionally include visualizations
+    # 处理数据
+    # 生成指定格式的输出
+    # 按需加入可视化内容
 ```
 ````
 
-**Low freedom** (specific scripts, few or no parameters):
+**低自由度**（明确指定脚本，且参数很少或没有参数）
 
-Use when:
+适用于：
 
-* Operations are fragile and error-prone
-* Consistency is critical
-* A specific sequence must be followed
+* 操作容易出错。
+* 一致性非常重要。
+* 必须遵循特定顺序。
 
-Example:
+示例：
 
 ````markdown  theme={null}
-## Database migration
+## 数据库迁移
 
-Run exactly this script:
+严格按以下命令运行脚本：
 
 ```bash
 python scripts/migrate.py --verify --backup
 ```
 
-Do not modify the command or add additional flags.
+不得修改命令或添加参数。
 ````
 
-**Analogy**: Think of the agent as a robot exploring a path:
+可以把代理想象成在探索路线的机器人：
 
-* **Narrow bridge with cliffs on both sides**: There's only one safe way forward. Provide specific guardrails and exact instructions (low freedom). Example: database migrations that must run in exact sequence.
-* **Open field with no hazards**: Many paths lead to success. Give general direction and trust the agent to find the best route (high freedom). Example: code reviews where context determines the best approach.
+* **两侧都是悬崖的窄桥**只有一条安全路线，需要明确的约束和精确指令（低自由度）。数据库迁移就是一例，必须按规定顺序运行。
+* **没有危险的开阔地**有多条可行路线。给出大致方向，让代理自己找到最佳做法（高自由度）。代码审查就是一例，最佳做法取决于上下文。
 
-### Test with all models you plan to use
+### 使用计划支持的所有模型进行测试
 
-Skills act as additions to models, so effectiveness depends on the underlying model. Test your Skill with all the models you plan to use it with.
+技能是对模型的补充，其效果取决于底层模型。用计划支持的每个模型测试技能。
 
-**Testing considerations by model**:
+各模型的测试重点：
 
-* **Claude Haiku** (fast, economical): Does the Skill provide enough guidance?
-* **Claude Sonnet** (balanced): Is the Skill clear and efficient?
-* **Claude Opus** (powerful reasoning): Does the Skill avoid over-explaining?
+* **Claude Haiku**（快速、经济）：技能是否提供了足够的指引？
+* **Claude Sonnet**（均衡）：技能是否清楚、易于使用？
+* **Claude Opus**（推理能力强）：技能是否避免了过度解释？
 
-What works perfectly for Opus might need more detail for Haiku. If you plan to use your Skill across multiple models, aim for instructions that work well with all of them.
+对 Opus 恰到好处的指引，Haiku 可能还需要更多细节。如果计划在多个模型上使用技能，尽量让指令对所有目标模型都有效。
 
-## Skill structure
+## 技能结构
 
 <Note>
-  **YAML Frontmatter**: The SKILL.md frontmatter requires two fields:
+  **YAML 前置元数据**：SKILL.md 的前置元数据要求两个字段：
 
-  * `name` - Human-readable name of the Skill (64 characters maximum)
-  * `description` - One-line description of what the Skill does and when to use it (1024 characters maximum)
+  * `name` - 便于人阅读的技能名称（最多 64 字符）
+  * `description` - 用一行说明技能的用途和适用条件（最多 1024 字符）
 
-  For complete Skill structure details, see the [Skills overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#skill-structure).
+  完整的技能结构见[技能概览](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#skill-structure)。
 </Note>
 
-### Naming conventions
+### 命名约定
 
-Use consistent naming patterns to make Skills easier to reference and discuss. We recommend using **gerund form** (verb + -ing) for Skill names, as this clearly describes the activity or capability the Skill provides.
+保持命名方式一致，方便在文档和讨论中引用技能。英文名推荐用**动名词形式**（动词加 `-ing`），以直接说明该技能提供的能力。
 
-**Good naming examples (gerund form)**:
+推荐的动名词形式：
 
-* "Processing PDFs"
-* "Analyzing spreadsheets"
-* "Managing databases"
-* "Testing code"
-* "Writing documentation"
+* 「Processing PDFs」（处理 PDF）
+* 「Analyzing spreadsheets」（分析电子表格）
+* 「Managing databases」（管理数据库）
+* 「Testing code」（测试代码）
+* 「Writing documentation」（编写文档）
 
-**Acceptable alternatives**:
+也可以采用：
 
-* Noun phrases: "PDF Processing", "Spreadsheet Analysis"
-* Action-oriented: "Process PDFs", "Analyze Spreadsheets"
+* 名词短语，如「PDF Processing」「Spreadsheet Analysis」。
+* 动作导向的短语，如「Process PDFs」「Analyze Spreadsheets」。
 
-**Avoid**:
+应避免：
 
-* Vague names: "Helper", "Utils", "Tools"
-* Overly generic: "Documents", "Data", "Files"
-* Inconsistent patterns within your skill collection
+* 含糊的名称，如「Helper」「Utils」「Tools」。
+* 过于宽泛的名称，如「Documents」「Data」「Files」。
+* 同一个技能库中混用不一致的命名方式。
 
-Consistent naming makes it easier to:
+统一命名有助于在文档和对话中引用技能，快速理解技能用途，组织和搜索多个技能，以及维护风格一致的技能库。
 
-* Reference Skills in documentation and conversations
-* Understand what a Skill does at a glance
-* Organize and search through multiple Skills
-* Maintain a professional, cohesive skill library
+### 编写有效的描述
 
-### Writing effective descriptions
-
-The `description` field enables Skill discovery and should include both what the Skill does and when to use it.
+`description` 字段用于发现技能。按 Anthropic 的指南，其中应同时说明技能的用途和适用条件。
 
 <Warning>
-  **Always write in third person**. The description is injected into the system prompt, and inconsistent point-of-view can cause discovery problems.
+  **始终使用第三人称。** 描述会注入系统提示词，视角不统一会影响技能发现。
 
-  * **Good:** "Processes Excel files and generates reports"
-  * **Avoid:** "I can help you process Excel files"
-  * **Avoid:** "You can use this to process Excel files"
+  * **正确：**「处理 Excel 文件并生成报告」
+  * **避免：**「我可以帮你处理 Excel 文件」
+  * **避免：**「你可以用这个技能处理 Excel 文件」
 </Warning>
 
-**Be specific and include key terms**. Include both what the Skill does and specific triggers/contexts for when to use it.
+**写具体内容，并包含关键词。** 写明技能能做什么，以及哪些触发条件或情境适合使用。
 
-Each Skill has exactly one description field. The description is critical for skill selection: agents use it to choose the right Skill from potentially 100+ available Skills. Your description must provide enough detail for an agent to know when to select this Skill, while the rest of SKILL.md provides the implementation details.
+每个技能只有一个描述字段。代理可能要从 100 多项技能中作出选择，因此描述对选中正确的技能至关重要。描述应提供足够的信息，让代理知道何时选择该技能，实施细节则写在 SKILL.md 的其余部分。
 
-Effective examples:
+有效的示例：
 
-**PDF Processing skill:**
+**PDF 处理技能**
 
 ```yaml  theme={null}
-description: Extract text and tables from PDF files, fill forms, merge documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
+description: 适用于处理 PDF 文件，或用户提到 PDF、表单或文档提取的情况。可从 PDF 中提取文本和表格、填写表单及合并文档。
 ```
 
-**Excel Analysis skill:**
+**Excel 分析技能**
 
 ```yaml  theme={null}
-description: Analyze Excel spreadsheets, create pivot tables, generate charts. Use when analyzing Excel files, spreadsheets, tabular data, or .xlsx files.
+description: 适用于分析 Excel 文件、电子表格、表格数据或 .xlsx 文件。可分析 Excel 电子表格、创建数据透视表及生成图表。
 ```
 
-**Git Commit Helper skill:**
+**Git 提交辅助技能**
 
 ```yaml  theme={null}
-description: Generate descriptive commit messages by analyzing git diffs. Use when the user asks for help writing commit messages or reviewing staged changes.
+description: 适用于用户请求协助编写提交信息或审查已暂存的改动。可分析 Git 差异并生成能说明改动内容的提交信息。
 ```
 
-Avoid vague descriptions like these:
+避免以下含糊的描述：
 
 ```yaml  theme={null}
-description: Helps with documents
-```
-
-```yaml  theme={null}
-description: Processes data
+description: 帮助处理文档
 ```
 
 ```yaml  theme={null}
-description: Does stuff with files
+description: 处理数据
 ```
 
-### Progressive disclosure patterns
+```yaml  theme={null}
+description: 对文件做一些操作
+```
 
-SKILL.md serves as an overview that points agents to detailed materials as needed, like a table of contents in an onboarding guide. For an explanation of how progressive disclosure works, see [How Skills work](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#how-skills-work) in the overview.
+### 渐进式披露的组织模式
 
-**Practical guidance:**
+SKILL.md 提供概览，并像入门指南的目录一样，按需将代理引向详细资料。有关渐进式披露的原理，见概览中的[技能如何运作](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#how-skills-work)。
 
-* Keep SKILL.md body under 500 lines for optimal performance
-* Split content into separate files when approaching this limit
-* Use the patterns below to organize instructions, code, and resources effectively
+实际建议：
 
-#### Visual overview: From simple to complex
+* 为获得最佳效果，把 SKILL.md 正文控制在 500 行以内。
+* 接近上限时，将内容拆到单独的文件。
+* 用以下模式有效组织指令、代码和资源。
 
-A basic Skill starts with just a SKILL.md file containing metadata and instructions:
+#### 图示：从简单到复杂
 
-<img src="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=87782ff239b297d9a9e8e1b72ed72db9" alt="Simple SKILL.md file showing YAML frontmatter and markdown body" data-og-width="2048" width="2048" data-og-height="1153" height="1153" data-path="images/agent-skills-simple-file.png" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=280&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=c61cc33b6f5855809907f7fda94cd80e 280w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=560&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=90d2c0c1c76b36e8d485f49e0810dbfd 560w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=840&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=ad17d231ac7b0bea7e5b4d58fb4aeabb 840w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=1100&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=f5d0a7a3c668435bb0aee9a3a8f8c329 1100w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=1650&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=0e927c1af9de5799cfe557d12249f6e6 1650w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=2500&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=46bbb1a51dd4c8202a470ac8c80a893d 2500w" />
+最基础的技能可以只有一个包含元数据和指令的 SKILL.md 文件：
 
-As your Skill grows, you can bundle additional content that agents load only when needed:
+<img src="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=87782ff239b297d9a9e8e1b72ed72db9" alt="简单的 SKILL.md 文件，含 YAML 前置元数据和 Markdown 正文" data-og-width="2048" width="2048" data-og-height="1153" height="1153" data-path="images/agent-skills-simple-file.png" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=280&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=c61cc33b6f5855809907f7fda94cd80e 280w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=560&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=90d2c0c1c76b36e8d485f49e0810dbfd 560w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=840&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=ad17d231ac7b0bea7e5b4d58fb4aeabb 840w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=1100&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=f5d0a7a3c668435bb0aee9a3a8f8c329 1100w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=1650&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=0e927c1af9de5799cfe557d12249f6e6 1650w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-simple-file.png?w=2500&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=46bbb1a51dd4c8202a470ac8c80a893d 2500w" />
 
-<img src="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=a5e0aa41e3d53985a7e3e43668a33ea3" alt="Bundling additional reference files like reference.md and forms.md." data-og-width="2048" width="2048" data-og-height="1327" height="1327" data-path="images/agent-skills-bundling-content.png" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=280&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=f8a0e73783e99b4a643d79eac86b70a2 280w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=560&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=dc510a2a9d3f14359416b706f067904a 560w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=840&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=82cd6286c966303f7dd914c28170e385 840w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=1100&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=56f3be36c77e4fe4b523df209a6824c6 1100w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=1650&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=d22b5161b2075656417d56f41a74f3dd 1650w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=2500&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=3dd4bdd6850ffcc96c6c45fcb0acd6eb 2500w" />
+技能扩充后，可以附带其他内容，让代理按需加载：
 
-The complete Skill directory structure might look like this:
+<img src="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=a5e0aa41e3d53985a7e3e43668a33ea3" alt="随技能附带 reference.md 和 forms.md 等参考文件" data-og-width="2048" width="2048" data-og-height="1327" height="1327" data-path="images/agent-skills-bundling-content.png" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=280&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=f8a0e73783e99b4a643d79eac86b70a2 280w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=560&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=dc510a2a9d3f14359416b706f067904a 560w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=840&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=82cd6286c966303f7dd914c28170e385 840w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=1100&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=56f3be36c77e4fe4b523df209a6824c6 1100w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=1650&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=d22b5161b2075656417d56f41a74f3dd 1650w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-bundling-content.png?w=2500&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=3dd4bdd6850ffcc96c6c45fcb0acd6eb 2500w" />
+
+完整的技能目录结构可能如下：
 
 ```
 pdf/
-├── SKILL.md              # Main instructions (loaded when triggered)
-├── FORMS.md              # Form-filling guide (loaded as needed)
-├── reference.md          # API reference (loaded as needed)
-├── examples.md           # Usage examples (loaded as needed)
+├── SKILL.md              # 主要指令（触发时加载）
+├── FORMS.md              # 表单填写指南（按需加载）
+├── reference.md          # API 参考（按需加载）
+├── examples.md           # 用法示例（按需加载）
 └── scripts/
-    ├── analyze_form.py   # Utility script (executed, not loaded)
-    ├── fill_form.py      # Form filling script
-    └── validate.py       # Validation script
+    ├── analyze_form.py   # 工具脚本（执行时无需载入上下文）
+    ├── fill_form.py      # 表单填写脚本
+    └── validate.py       # 验证脚本
 ```
 
-#### Pattern 1: High-level guide with references
+#### 模式 1：提供概览，链接参考资料
 
 ````markdown  theme={null}
 ---
 name: PDF Processing
-description: Extracts text and tables from PDF files, fills forms, and merges documents. Use when working with PDF files or when the user mentions PDFs, forms, or document extraction.
+description: 适用于处理 PDF 文件，或用户提到 PDF、表单或文档提取的情况。可提取文本和表格、填写表单及合并文档。
 ---
 
-# PDF Processing
+# PDF 处理
 
-## Quick start
+## 快速入门
 
-Extract text with pdfplumber:
+用 pdfplumber 提取文本：
 ```python
 import pdfplumber
 with pdfplumber.open("file.pdf") as pdf:
     text = pdf.pages[0].extract_text()
 ```
 
-## Advanced features
+## 高级功能
 
-**Form filling**: See [FORMS.md](FORMS.md) for complete guide
-**API reference**: See [REFERENCE.md](REFERENCE.md) for all methods
-**Examples**: See [EXAMPLES.md](EXAMPLES.md) for common patterns
+**填写表单**的完整指南见 [FORMS.md](FORMS.md)。
+**API 参考**的完整方法列表见 [REFERENCE.md](REFERENCE.md)。
+**示例**中的常见模式见 [EXAMPLES.md](EXAMPLES.md)。
 ````
 
-Agents load FORMS.md, REFERENCE.md, or EXAMPLES.md only when needed.
+代理只在需要时加载 FORMS.md、REFERENCE.md 或 EXAMPLES.md。
 
-#### Pattern 2: Domain-specific organization
+#### 模式 2：按领域组织
 
-For Skills with multiple domains, organize content by domain to avoid loading irrelevant context. When a user asks about sales metrics, the agent only needs to read sales-related schemas, not finance or marketing data. This keeps token usage low and context focused.
+如果技能涉及多个领域，就按领域组织内容，避免载入无关上下文。用户询问销售指标时，代理只需读取销售相关的数据结构。将财务、营销资料拆开，可以减少 token 用量，让上下文围绕当前任务。
 
 ```
 bigquery-skill/
-├── SKILL.md (overview and navigation)
+├── SKILL.md（概览与导航）
 └── reference/
-    ├── finance.md (revenue, billing metrics)
-    ├── sales.md (opportunities, pipeline)
-    ├── product.md (API usage, features)
-    └── marketing.md (campaigns, attribution)
+    ├── finance.md（营收、账单指标）
+    ├── sales.md（商机、销售漏斗）
+    ├── product.md（API 用量、功能）
+    └── marketing.md（营销活动、归因）
 ```
 
 ````markdown SKILL.md theme={null}
-# BigQuery Data Analysis
+# BigQuery 数据分析
 
-## Available datasets
+## 可用数据集
 
-**Finance**: Revenue, ARR, billing → See [reference/finance.md](reference/finance.md)
-**Sales**: Opportunities, pipeline, accounts → See [reference/sales.md](reference/sales.md)
-**Product**: API usage, features, adoption → See [reference/product.md](reference/product.md)
-**Marketing**: Campaigns, attribution, email → See [reference/marketing.md](reference/marketing.md)
+**财务**涉及营收、ARR 和账单。见 [reference/finance.md](reference/finance.md)。
+**销售**涉及商机、销售漏斗和客户。见 [reference/sales.md](reference/sales.md)。
+**产品**涉及 API 用量、功能和采用情况。见 [reference/product.md](reference/product.md)。
+**营销**涉及营销活动、归因和电子邮件。见 [reference/marketing.md](reference/marketing.md)。
 
-## Quick search
+## 快速搜索
 
-Find specific metrics using grep:
+用 grep 查找特定指标：
 
 ```bash
 grep -i "revenue" reference/finance.md
@@ -329,534 +323,532 @@ grep -i "api usage" reference/product.md
 ```
 ````
 
-#### Pattern 3: Conditional details
+#### 模式 3：按条件提供细节
 
-Show basic content, link to advanced content:
+直接展示基础内容，用链接提供进阶内容：
 
 ```markdown  theme={null}
-# DOCX Processing
+# DOCX 处理
 
-## Creating documents
+## 创建文档
 
-Use docx-js for new documents. See [DOCX-JS.md](DOCX-JS.md).
+用 docx-js 创建新文档。见 [DOCX-JS.md](DOCX-JS.md)。
 
-## Editing documents
+## 编辑文档
 
-For simple edits, modify the XML directly.
+简单编辑可直接修改 XML。
 
-**For tracked changes**: See [REDLINING.md](REDLINING.md)
-**For OOXML details**: See [OOXML.md](OOXML.md)
+**修订跟踪**见 [REDLINING.md](REDLINING.md)。
+**OOXML 的细节**见 [OOXML.md](OOXML.md)。
 ```
 
-Agents read REDLINING.md or OOXML.md only when the user needs those features.
+代理只在用户需要对应功能时读取 REDLINING.md 或 OOXML.md。
 
-### Avoid deeply nested references
+### 避免多层嵌套引用
 
-Agents may partially read files when they're referenced from other referenced files. When encountering nested references, an agent might use commands like `head -100` to preview content rather than reading entire files, resulting in incomplete information.
+若引用文件再去引用其他文件，代理可能只读一部分内容。遇到嵌套引用时，代理可能用 `head -100` 等命令预览，而不读取完整文件，导致漏掉实际需要的信息。
 
-**Keep references one level deep from SKILL.md**. All reference files should link directly from SKILL.md to ensure agents read complete files when needed.
+**参考资料与 SKILL.md 之间只保留一层。** 所有参考文件都应从 SKILL.md 直接链接，确保代理按需完整读取。
 
-**Bad example: Too deep**:
+**不佳的示例：嵌套层级太深**
 
 ```markdown  theme={null}
 # SKILL.md
-See [advanced.md](advanced.md)...
+见 [advanced.md](advanced.md)……
 
 # advanced.md
-See [details.md](details.md)...
+见 [details.md](details.md)……
 
 # details.md
-Here's the actual information...
+具体信息写在这里……
 ```
 
-**Good example: One level deep**:
+**好的示例：只保留一层**
 
 ```markdown  theme={null}
 # SKILL.md
 
-**Basic usage**: [instructions in SKILL.md]
-**Advanced features**: See [advanced.md](advanced.md)
-**API reference**: See [reference.md](reference.md)
-**Examples**: See [examples.md](examples.md)
+**基本用法**：[instructions in SKILL.md]
+**高级功能**：见 [advanced.md](advanced.md)
+**API 参考**：见 [reference.md](reference.md)
+**示例**：见 [examples.md](examples.md)
 ```
 
-### Structure longer reference files with table of contents
+### 为较长的参考文件添加目录
 
-For reference files longer than 100 lines, include a table of contents at the top. This ensures agents can see the full scope of available information even when previewing with partial reads.
+参考文件超过 100 行时，在顶部加上目录。这样，代理即使只读开头，也能知道有哪些信息可用。
 
-**Example**:
+示例：
 
 ```markdown  theme={null}
-# API Reference
+# API 参考
 
-## Contents
-- Authentication and setup
-- Core methods (create, read, update, delete)
-- Advanced features (batch operations, webhooks)
-- Error handling patterns
-- Code examples
+## 目录
+- 身份验证与配置
+- 核心方法（创建、读取、更新、删除）
+- 高级功能（批量操作、Webhook）
+- 错误处理模式
+- 代码示例
 
-## Authentication and setup
+## 身份验证与配置
 ...
 
-## Core methods
+## 核心方法
 ...
 ```
 
-Agents can then read the complete file or jump to specific sections as needed.
+代理可以按需阅读全文，或跳到指定章节。
 
-For details on how this filesystem-based architecture enables progressive disclosure, see the [Runtime environment](#runtime-environment) section in the Advanced section below.
+有关这种基于文件系统的架构如何实现渐进式披露，见下文高级部分的[运行环境](#runtime-environment)。
 
-## Workflows and feedback loops
+## 工作流程和反馈循环
 
-### Use workflows for complex tasks
+### 为复杂任务设计工作流程
 
-Break complex operations into clear, sequential steps. For particularly complex workflows, provide a checklist that the agent can copy into its response and check off as it progresses.
+把复杂操作拆成清晰、有序的步骤。流程特别复杂时，提供一份代理能复制到回复中、随进度逐项勾选的检查清单。
 
-**Example 1: Research synthesis workflow** (for Skills without code):
-
-````markdown  theme={null}
-## Research synthesis workflow
-
-Copy this checklist and track your progress:
-
-```
-Research Progress:
-- [ ] Step 1: Read all source documents
-- [ ] Step 2: Identify key themes
-- [ ] Step 3: Cross-reference claims
-- [ ] Step 4: Create structured summary
-- [ ] Step 5: Verify citations
-```
-
-**Step 1: Read all source documents**
-
-Review each document in the `sources/` directory. Note the main arguments and supporting evidence.
-
-**Step 2: Identify key themes**
-
-Look for patterns across sources. What themes appear repeatedly? Where do sources agree or disagree?
-
-**Step 3: Cross-reference claims**
-
-For each major claim, verify it appears in the source material. Note which source supports each point.
-
-**Step 4: Create structured summary**
-
-Organize findings by theme. Include:
-- Main claim
-- Supporting evidence from sources
-- Conflicting viewpoints (if any)
-
-**Step 5: Verify citations**
-
-Check that every claim references the correct source document. If citations are incomplete, return to Step 3.
-````
-
-This example shows how workflows apply to analysis tasks that don't require code. The checklist pattern works for any complex, multi-step process.
-
-**Example 2: PDF form filling workflow** (for Skills with code):
+**示例 1：汇总研究资料的工作流程**（适用于不含代码的技能）
 
 ````markdown  theme={null}
-## PDF form filling workflow
+## 汇总研究资料的工作流程
 
-Copy this checklist and check off items as you complete them:
+复制此清单并跟踪进展：
 
 ```
-Task Progress:
-- [ ] Step 1: Analyze the form (run analyze_form.py)
-- [ ] Step 2: Create field mapping (edit fields.json)
-- [ ] Step 3: Validate mapping (run validate_fields.py)
-- [ ] Step 4: Fill the form (run fill_form.py)
-- [ ] Step 5: Verify output (run verify_output.py)
+研究进度：
+- [ ] 第 1 步：阅读所有来源文档
+- [ ] 第 2 步：识别主要主题
+- [ ] 第 3 步：交叉核对主张
+- [ ] 第 4 步：撰写结构化摘要
+- [ ] 第 5 步：验证引文
 ```
 
-**Step 1: Analyze the form**
+**第 1 步：阅读所有来源文档**
 
-Run: `python scripts/analyze_form.py input.pdf`
+阅读 `sources/` 目录中的每份文档，记录主要论点和支持证据。
 
-This extracts form fields and their locations, saving to `fields.json`.
+**第 2 步：识别主要主题**
 
-**Step 2: Create field mapping**
+找出各来源之间的共同点。哪些主题反复出现？哪些方面意见一致，哪些方面有分歧？
 
-Edit `fields.json` to add values for each field.
+**第 3 步：交叉核对主张**
 
-**Step 3: Validate mapping**
+逐一确认每项主要主张都有资料依据，记录各论点分别得到了哪个来源的支持。
 
-Run: `python scripts/validate_fields.py fields.json`
+**第 4 步：撰写结构化摘要**
 
-Fix any validation errors before continuing.
+按主题组织发现，包含：
+- 主要主张
+- 来源中的支持证据
+- 有分歧的观点（如有）
 
-**Step 4: Fill the form**
+**第 5 步：验证引文**
 
-Run: `python scripts/fill_form.py input.pdf fields.json output.pdf`
-
-**Step 5: Verify output**
-
-Run: `python scripts/verify_output.py output.pdf`
-
-If verification fails, return to Step 2.
+确认每项主张都引用了正确的来源。如果有引文遗漏，回到第 3 步。
 ````
 
-Clear steps prevent agents from skipping critical validation. The checklist helps both you and the agent track progress through multi-step workflows.
+示例说明了如何用工作流程开展无需编写代码的分析任务。检查清单也适用于其他复杂的多步骤流程。
 
-### Implement feedback loops
+**示例 2：填写 PDF 表单的工作流程**（适用于含代码的技能）
 
-**Common pattern**: Run validator → fix errors → repeat
+````markdown  theme={null}
+## 填写 PDF 表单的工作流程
 
-This pattern greatly improves output quality.
+复制此清单，每完成一项就打勾：
 
-**Example 1: Style guide compliance** (for Skills without code):
-
-```markdown  theme={null}
-## Content review process
-
-1. Draft your content following the guidelines in STYLE_GUIDE.md
-2. Review against the checklist:
-   - Check terminology consistency
-   - Verify examples follow the standard format
-   - Confirm all required sections are present
-3. If issues found:
-   - Note each issue with specific section reference
-   - Revise the content
-   - Review the checklist again
-4. Only proceed when all requirements are met
-5. Finalize and save the document
+```
+任务进度：
+- [ ] 第 1 步：分析表单（运行 analyze_form.py）
+- [ ] 第 2 步：创建字段映射（编辑 fields.json）
+- [ ] 第 3 步：验证映射（运行 validate_fields.py）
+- [ ] 第 4 步：填写表单（运行 fill_form.py）
+- [ ] 第 5 步：验证输出（运行 verify_output.py）
 ```
 
-This shows the validation loop pattern using reference documents instead of scripts. The "validator" is STYLE\_GUIDE.md, and the agent performs the check by reading and comparing.
+**第 1 步：分析表单**
 
-**Example 2: Document editing process** (for Skills with code):
+运行 `python scripts/analyze_form.py input.pdf`。
+
+此命令提取表单字段及其位置，并将结果保存到 `fields.json`。
+
+**第 2 步：创建字段映射**
+
+编辑 `fields.json`，为每个字段添加值。
+
+**第 3 步：验证映射**
+
+运行 `python scripts/validate_fields.py fields.json`。
+
+修复所有验证错误后才能继续。
+
+**第 4 步：填写表单**
+
+运行 `python scripts/fill_form.py input.pdf fields.json output.pdf`。
+
+**第 5 步：验证输出**
+
+运行 `python scripts/verify_output.py output.pdf`。
+
+如果验证失败，回到第 2 步。
+````
+
+明确的步骤可防止代理跳过关键验证。检查清单能让你和代理都知道多步骤流程进行到了哪里。
+
+### 建立反馈循环
+
+**常见做法**是运行验证器、修复错误，再重复这一循环。这能显著提高输出质量。
+
+**示例 1：遵循风格指南**（适用于不含代码的技能）
 
 ```markdown  theme={null}
-## Document editing process
+## 内容审查流程
 
-1. Make your edits to `word/document.xml`
-2. **Validate immediately**: `python ooxml/scripts/validate.py unpacked_dir/`
-3. If validation fails:
-   - Review the error message carefully
-   - Fix the issues in the XML
-   - Run validation again
-4. **Only proceed when validation passes**
-5. Rebuild: `python ooxml/scripts/pack.py unpacked_dir/ output.docx`
-6. Test the output document
+1. 按照 STYLE_GUIDE.md 的指引起草内容。
+2. 对照清单审查：
+   - 检查术语是否一致。
+   - 验证示例是否符合标准格式。
+   - 确认所有必需章节都已包含。
+3. 如果发现问题：
+   - 记录每个问题及其所在的具体章节。
+   - 修改内容。
+   - 再次按照清单审查。
+4. 满足所有要求后才能继续。
+5. 定稿并保存文档。
 ```
 
-The validation loop catches errors early.
+此例的验证循环使用参考文档。代理通过阅读并与 STYLE\_GUIDE.md 对照，完成验证。
 
-## Content guidelines
-
-### Avoid time-sensitive information
-
-Don't include information that will become outdated:
-
-**Bad example: Time-sensitive** (will become wrong):
+**示例 2：编辑文档**（适用于含代码的技能）
 
 ```markdown  theme={null}
-If you're doing this before August 2025, use the old API.
-After August 2025, use the new API.
+## 编辑文档的流程
+
+1. 编辑 `word/document.xml`。
+2. **立即验证**：`python ooxml/scripts/validate.py unpacked_dir/`
+3. 如果验证失败：
+   - 仔细阅读错误消息。
+   - 修复 XML 中的问题。
+   - 再次运行验证。
+4. **只有通过验证才能继续。**
+5. 重新打包：`python ooxml/scripts/pack.py unpacked_dir/ output.docx`
+6. 测试输出文档。
 ```
 
-**Good example** (use "old patterns" section):
+验证循环能及早发现错误。
+
+## 内容编写指南
+
+### 避免有时效性的信息
+
+避免加入以后会过时的信息。
+
+**不佳的示例：有时效性**（以后会出错）
 
 ```markdown  theme={null}
-## Current method
+如果你在 2025 年 8 月前执行此操作，请使用旧版 API。
+2025 年 8 月之后，请使用新版 API。
+```
 
-Use the v2 API endpoint: `api.example.com/v2/messages`
+**好的示例**（设置「旧用法」一节）
 
-## Old patterns
+```markdown  theme={null}
+## 当前用法
+
+使用 v2 API 端点 `api.example.com/v2/messages`。
+
+## 旧用法
 
 <details>
-<summary>Legacy v1 API (deprecated 2025-08)</summary>
+<summary>旧版 v1 API（2025-08 弃用）</summary>
 
-The v1 API used: `api.example.com/v1/messages`
+v1 API 使用 `api.example.com/v1/messages`。
 
-This endpoint is no longer supported.
+此端点已停止支持。
 </details>
 ```
 
-The old patterns section provides historical context without cluttering the main content.
+「旧用法」一节可以交代历史背景，又让主要内容保持简洁。
 
-### Use consistent terminology
+### 统一术语
 
-Choose one term and use it throughout the Skill:
+选定一个术语后，在整个技能中始终使用它。
 
-**Good - Consistent**:
+**正确，保持一致：**
 
-* Always "API endpoint"
-* Always "field"
-* Always "extract"
+* 一律使用「API 端点」。
+* 一律使用「字段」。
+* 一律使用「提取」。
 
-**Bad - Inconsistent**:
+**不佳，混用术语：**
 
-* Mix "API endpoint", "URL", "API route", "path"
-* Mix "field", "box", "element", "control"
-* Mix "extract", "pull", "get", "retrieve"
+* 混用「API 端点」「URL」「API 路由」「路径」。
+* 混用「字段」「输入框」「元素」「控件」。
+* 混用「提取」「拉取」「获取」「检索」。
 
-Consistency helps agents understand and follow instructions.
+统一术语有助于代理理解并遵循指令。
 
-## Common patterns
+## 常见模式
 
-### Template pattern
+### 模板模式
 
-Provide templates for output format. Match the level of strictness to your needs.
+提供输出格式模板，按需要决定对格式要求有多严格。
 
-**For strict requirements** (like API responses or data formats):
+**对格式要求严格**（如 API 响应或数据格式）
 
 ````markdown  theme={null}
-## Report structure
+## 报告结构
 
-ALWAYS use this exact template structure:
+始终严格使用以下模板结构：
 
 ```markdown
 # [Analysis Title]
 
-## Executive summary
+## 执行摘要
 [One-paragraph overview of key findings]
 
-## Key findings
-- Finding 1 with supporting data
-- Finding 2 with supporting data
-- Finding 3 with supporting data
+## 主要发现
+- 发现 1 及支持数据
+- 发现 2 及支持数据
+- 发现 3 及支持数据
 
-## Recommendations
-1. Specific actionable recommendation
-2. Specific actionable recommendation
+## 建议
+1. 具体可执行的建议
+2. 具体可执行的建议
 ```
 ````
 
-**For flexible guidance** (when adaptation is useful):
+**提供灵活的指引**（适合按情况调整）
 
 ````markdown  theme={null}
-## Report structure
+## 报告结构
 
-Here is a sensible default format, but use your best judgment based on the analysis:
+下面是合理的默认格式，可根据分析结果自行调整：
 
 ```markdown
 # [Analysis Title]
 
-## Executive summary
+## 执行摘要
 [Overview]
 
-## Key findings
+## 主要发现
 [Adapt sections based on what you discover]
 
-## Recommendations
+## 建议
 [Tailor to the specific context]
 ```
 
-Adjust sections as needed for the specific analysis type.
+根据分析类型按需调整各节。
 ````
 
-### Examples pattern
+### 示例模式
 
-For Skills where output quality depends on seeing examples, provide input/output pairs just like in regular prompting:
+如果技能的输出质量取决于代理是否看到示例，就像编写普通提示词一样，提供成对的输入与输出：
 
 ````markdown  theme={null}
-## Commit message format
+## 提交信息格式
 
-Generate commit messages following these examples:
+按以下示例生成提交信息：
 
-**Example 1:**
-Input: Added user authentication with JWT tokens
-Output:
+**示例 1**
+输入：添加了基于 JWT 的用户身份验证
+输出：
 ```
-feat(auth): implement JWT-based authentication
+feat(auth): 实现基于 JWT 的身份验证
 
-Add login endpoint and token validation middleware
-```
-
-**Example 2:**
-Input: Fixed bug where dates displayed incorrectly in reports
-Output:
-```
-fix(reports): correct date formatting in timezone conversion
-
-Use UTC timestamps consistently across report generation
+添加登录端点和令牌验证中间件
 ```
 
-**Example 3:**
-Input: Updated dependencies and refactored error handling
-Output:
+**示例 2**
+输入：修复了报告中日期显示错误的问题
+输出：
 ```
-chore: update dependencies and refactor error handling
+fix(reports): 修正时区转换中的日期格式
 
-- Upgrade lodash to 4.17.21
-- Standardize error response format across endpoints
+统一在生成报告时使用 UTC 时间戳
 ```
 
-Follow this style: type(scope): brief description, then detailed explanation.
+**示例 3**
+输入：更新了依赖并重构了错误处理
+输出：
+```
+chore: 更新依赖并重构错误处理
+
+- 将 lodash 升级到 4.17.21
+- 统一各端点的错误响应格式
+```
+
+遵循 type(scope): brief description 的格式，再写详细说明。
 ````
 
-Examples help agents understand the desired style and level of detail more clearly than descriptions alone.
+示例比单靠描述更容易让代理掌握所需的风格和详细程度。
 
-### Conditional workflow pattern
+### 条件式工作流程
 
-Guide agents through decision points:
+在决策点指明代理应走哪条路径：
 
 ```markdown  theme={null}
-## Document modification workflow
+## 文档修改工作流程
 
-1. Determine the modification type:
+1. 判断修改类型：
 
-   **Creating new content?** → Follow "Creation workflow" below
-   **Editing existing content?** → Follow "Editing workflow" below
+   **创建新内容？** → 使用下文的「创建流程」
+   **编辑现有内容？** → 使用下文的「编辑流程」
 
-2. Creation workflow:
-   - Use docx-js library
-   - Build document from scratch
-   - Export to .docx format
+2. 创建流程：
+   - 使用 docx-js 库。
+   - 从头创建文档。
+   - 导出为 .docx 格式。
 
-3. Editing workflow:
-   - Unpack existing document
-   - Modify XML directly
-   - Validate after each change
-   - Repack when complete
+3. 编辑流程：
+   - 解包现有文档。
+   - 直接修改 XML。
+   - 每次修改后验证。
+   - 完成后重新打包。
 ```
 
 <Tip>
-  If workflows become large or complicated with many steps, consider pushing them into separate files and tell the agent to read the appropriate file based on the task at hand.
+  如果流程变长、步骤复杂，可以拆到单独的文件中，并告诉代理如何根据当前任务选择文件。
 </Tip>
 
-## Evaluation and iteration
+## 评估和迭代
 
-### Build evaluations first
+### 先编写评估
 
-**Create evaluations BEFORE writing extensive documentation.** This ensures your Skill solves real problems rather than documenting imagined ones.
+**在编写大量文档之前先创建评估。** 这样能让技能解决实际存在的问题。
 
-**Evaluation-driven development:**
+按以下步骤开展评估驱动开发：
 
-1. **Identify gaps**: Run your agent on representative tasks without a Skill. Document specific failures or missing context
-2. **Create evaluations**: Build three scenarios that test these gaps
-3. **Establish baseline**: Measure the agent's performance without the Skill
-4. **Write minimal instructions**: Create just enough content to address the gaps and pass evaluations
-5. **Iterate**: Execute evaluations, compare against baseline, and refine
+1. **发现缺口。** 让代理在未加载技能时执行有代表性的任务，记录具体失败或缺失的上下文。
+2. **创建评估。** 编写三个场景来测试这些缺口。
+3. **建立基线。** 衡量代理在没有技能时的表现。
+4. **编写最精简的指令。** 只写解决这些缺口并通过评估所需的内容。
+5. **迭代。** 运行评估，与基线比较，再完善指令。
 
-This approach ensures you're solving actual problems rather than anticipating requirements that may never materialize.
+这样可以围绕已发生的问题开展工作，避免提前猜测可能永远不会出现的需求。
 
-**Evaluation structure**:
+评估结构示例：
 
 ```json  theme={null}
 {
   "skills": ["pdf-processing"],
-  "query": "Extract all text from this PDF file and save it to output.txt",
+  "query": "提取此 PDF 文件中的全部文本，并保存到 output.txt",
   "files": ["test-files/document.pdf"],
   "expected_behavior": [
-    "Successfully reads the PDF file using an appropriate PDF processing library or command-line tool",
-    "Extracts text content from all pages in the document without missing any pages",
-    "Saves the extracted text to a file named output.txt in a clear, readable format"
+    "使用合适的 PDF 处理库或命令行工具成功读取 PDF 文件",
+    "提取文档所有页面的文本内容，没有遗漏页面",
+    "将提取的文本以清晰易读的格式保存到名为 output.txt 的文件"
   ]
 }
 ```
 
 <Note>
-  This example demonstrates a data-driven evaluation with a simple testing rubric. We do not currently provide a built-in way to run these evaluations. Users can create their own evaluation system. Evaluations are your source of truth for measuring Skill effectiveness.
+  本例展示了如何用简单的评分规则做数据驱动的评估。Anthropic 目前没有提供运行此类评估的内置功能，用户可以创建自己的评估系统。衡量技能效果时，以实际评估为依据。
 </Note>
 
-### Develop Skills iteratively with the agent
+### 与代理共同迭代技能
 
-The most effective Skill development process involves the agent itself. Work with one instance ("Agent A") to create a Skill that will be used by other instances ("Agent B"). Agent A helps you design and refine instructions, while Agent B tests them in real tasks. This works because the underlying models understand both how to write effective agent instructions and what information agents need.
+在技能开发中让代理参与进来，效果最好。用一个实例（「代理 A」）创建技能，再交给其他实例（「代理 B」）使用。代理 A 帮你设计和完善指令，代理 B 则在实际任务中测试。底层模型既知道如何编写有效的代理指令，也了解代理工作时需要哪些信息。
 
-**Creating a new Skill:**
+**创建新技能**
 
-1. **Complete a task without a Skill**: Work through a problem with Agent A using normal prompting. As you work, you'll naturally provide context, explain preferences, and share procedural knowledge. Notice what information you repeatedly provide.
+1. **先完成一项没有技能的任务。** 用普通提示词与代理 A 一起解决问题。过程中，你会自然地补充背景、说明偏好并分享操作经验。留意哪些信息反复出现。
 
-2. **Identify the reusable pattern**: After completing the task, identify what context you provided that would be useful for similar future tasks.
+2. **找出可复用的模式。** 完成任务后，想想哪些背景对将来类似的任务也有帮助。
 
-   **Example**: If you worked through a BigQuery analysis, you might have provided table names, field definitions, filtering rules (like "always exclude test accounts"), and common query patterns.
+   **例如**，进行 BigQuery 分析时，你可能提供过表名、字段定义、过滤规则（如「始终排除测试账号」）和常用查询模式。
 
-3. **Ask Agent A to create a Skill**: "Create a Skill that captures this BigQuery analysis pattern we just used. Include the table schemas, naming conventions, and the rule about filtering test accounts."
+3. **请代理 A 编写技能。**「把我们刚才的 BigQuery 分析模式编成一项技能，包含表结构、命名约定和过滤测试账号的规则。」
 
    <Tip>
-     Modern agents understand the Skill format and structure natively. You don't need special system prompts or a "writing skills" skill to get help creating Skills. Simply ask the agent to create a Skill and it will generate properly structured SKILL.md content with appropriate frontmatter and body content.
+     现代代理原生理解技能的格式和结构。直接请代理编写技能即可，它能生成结构正确的 SKILL.md，包含恰当的前置元数据和正文。无需特殊的系统提示词或专门用来编写技能的技能。
    </Tip>
 
-4. **Review for conciseness**: Check that Agent A hasn't added unnecessary explanations. Ask: "Remove the explanation about what win rate means - the agent already knows that."
+4. **检查是否简洁。** 确认代理 A 没有加入多余解释。可以说「删掉关于赢单率含义的解释，代理已经知道这个概念。」
 
-5. **Improve information architecture**: Ask Agent A to organize the content more effectively. For example: "Organize this so the table schema is in a separate reference file. We might add more tables later."
+5. **改进内容组织。** 请代理 A 用更有效的方式组织内容。例如「把表结构放进独立的参考文件。我们以后可能还会加表。」
 
-6. **Test on similar tasks**: Use the Skill with Agent B (a fresh instance with the Skill loaded) on related use cases. Observe whether Agent B finds the right information, applies rules correctly, and handles the task successfully.
+6. **用相似任务测试。** 让全新的代理 B 实例加载技能，执行相关任务。观察它能否找到所需信息、正确应用规则并成功完成任务。
 
-7. **Iterate based on observation**: If Agent B struggles or misses something, return to Agent A with specifics: "When the agent used this Skill, it forgot to filter by date for Q4. Should we add a section about date filtering patterns?"
+7. **根据观察改进。** 如果代理 B 遇到困难或漏掉了某些事项，带着具体情况回到代理 A。例如「代理使用这项技能时，忘了按第四季度的日期范围过滤。是否需要加一节讲日期过滤的常用模式？」
 
-**Iterating on existing Skills:**
+**迭代现有技能**
 
-The same hierarchical pattern continues when improving Skills. You alternate between:
+改进技能时，仍沿用这套分工：
 
-* **Working with Agent A** (the expert who helps refine the Skill)
-* **Testing with Agent B** (the agent using the Skill to perform real work)
-* **Observing Agent B's behavior** and bringing insights back to Agent A
+* 与负责完善技能的代理 A 合作。
+* 让代理 B 使用技能完成实际工作。
+* 观察代理 B 的行为，把发现反馈给代理 A。
 
-1. **Use the Skill in real workflows**: Give Agent B (with the Skill loaded) actual tasks, not test scenarios
+1. **在真实流程中使用技能。** 把实际任务交给已加载技能的代理 B。
 
-2. **Observe Agent B's behavior**: Note where it struggles, succeeds, or makes unexpected choices
+2. **观察代理 B 的行为。** 记录它在哪些地方遇到困难、顺利完成工作或作出了出乎意料的选择。
 
-   **Example observation**: "When I asked Agent B for a regional sales report, it wrote the query but forgot to filter out test accounts, even though the Skill mentions this rule."
+   **例如**，「我让代理 B 编写区域销售报告时，它写出了查询，却忘记排除测试账号。技能里已经写了这条规则。」
 
-3. **Return to Agent A for improvements**: Share the current SKILL.md and describe what you observed. Ask: "I noticed Agent B forgot to filter test accounts when I asked for a regional report. The Skill mentions filtering, but maybe it's not prominent enough?"
+3. **请代理 A 改进。** 把当前的 SKILL.md 和观察到的情况交给代理 A。例如「我让代理 B 编写区域报告时，它忘了过滤测试账号。技能提到了过滤要求，可能需要写得更醒目？」
 
-4. **Review Agent A's suggestions**: Agent A might suggest reorganizing to make rules more prominent, using stronger language like "MUST filter" instead of "always filter", or restructuring the workflow section.
+4. **审阅代理 A 的建议。** 它可能建议重新组织内容，让规则更醒目，改用强度更高的措辞，例如把「始终过滤」改为「必须过滤」，或者调整工作流程一节。
 
-5. **Apply and test changes**: Update the Skill with Agent A's refinements, then test again with Agent B on similar requests
+5. **应用并测试改动。** 按代理 A 的建议改进技能，再让代理 B 用类似请求测试。
 
-6. **Repeat based on usage**: Continue this observe-refine-test cycle as you encounter new scenarios. Each iteration improves the Skill based on real agent behavior, not assumptions.
+6. **随使用情况继续迭代。** 遇到新场景时，继续观察、完善和测试。每轮迭代都以代理的实际行为为依据。
 
-**Gathering team feedback:**
+**收集团队反馈**
 
-1. Share Skills with teammates and observe their usage
-2. Ask: Does the Skill activate when expected? Are instructions clear? What's missing?
-3. Incorporate feedback to address blind spots in your own usage patterns
+1. 与同事共享技能，观察他们怎么用。
+2. 询问技能是否在预期时机触发、指令是否清楚，以及缺少哪些内容。
+3. 吸收反馈，弥补自己使用方式中的盲点。
 
-**Why this approach works**: Agent A understands agent needs, you provide domain expertise, Agent B reveals gaps through real usage, and iterative refinement improves Skills based on observed behavior rather than assumptions.
+代理 A 了解代理需要哪些信息，你了解相关领域，代理 B 通过实际使用暴露缺口。每轮改进都以观察到的行为为依据。
 
-### Observe how agents navigate Skills
+### 观察代理如何查阅技能
 
-As you iterate on Skills, pay attention to how agents actually use them in practice. Watch for:
+迭代时留意代理在实际工作中如何使用技能，重点观察：
 
-* **Unexpected exploration paths**: Does the agent read files in an order you didn't anticipate? This might indicate your structure isn't as intuitive as you thought
-* **Missed connections**: Does the agent fail to follow references to important files? Your links might need to be more explicit or prominent
-* **Overreliance on certain sections**: If the agent repeatedly reads the same file, consider whether that content should be in the main SKILL.md instead
-* **Ignored content**: If the agent never accesses a bundled file, it might be unnecessary or poorly signaled in the main instructions
+* **出乎意料的查阅路径**：代理是否按意想不到的顺序读取文件？如果是，文件组织可能不够直观。
+* **遗漏的引用**：代理是否错过了指向重要文件的引用？链接可能需要更明确、更醒目。
+* **反复读取的章节**：如果代理总是读取同一份文件，可以考虑把这些内容放到主要的 SKILL.md 中。
+* **从不读取的内容**：如果代理从不访问附带的某个文件，该文件可能没必要保留，或者主要指令没有明确提示何时读取。
 
-Iterate based on these observations rather than assumptions. The 'name' and 'description' in your Skill's metadata are particularly critical. Agents use these when deciding whether to trigger the Skill in response to the current task. Make sure they clearly describe what the Skill does and when it should be used.
+按观察结果迭代。技能元数据中的 `name` 和 `description` 尤其重要。代理根据这两个字段判断当前任务是否应触发技能，因此要清楚说明技能的用途和适用条件。
 
-## Anti-patterns to avoid
+## 应避免的反模式
 
-### Avoid Windows-style paths
+### 避免 Windows 风格的路径
 
-Always use forward slashes in file paths, even on Windows:
+文件路径始终用正斜杠，即使在 Windows 上也一样：
 
-* ✓ **Good**: `scripts/helper.py`, `reference/guide.md`
-* ✗ **Avoid**: `scripts\helper.py`, `reference\guide.md`
+* ✓ **正确**：`scripts/helper.py`、`reference/guide.md`
+* ✗ **避免**：`scripts\helper.py`、`reference\guide.md`
 
-Unix-style paths work across all platforms, while Windows-style paths cause errors on Unix systems.
+Unix 风格的路径可以跨平台使用，Windows 风格的路径会在 Unix 系统上出错。
 
-### Avoid offering too many options
+### 避免提供太多选项
 
-Don't present multiple approaches unless necessary:
+仅在确有必要时提供多种做法：
 
 ````markdown  theme={null}
-**Bad example: Too many choices** (confusing):
-"You can use pypdf, or pdfplumber, or PyMuPDF, or pdf2image, or..."
+**不佳的示例：选项太多，容易困惑**
+「可以用 pypdf、pdfplumber、PyMuPDF、pdf2image，或者……」
 
-**Good example: Provide a default** (with escape hatch):
-"Use pdfplumber for text extraction:
+**好的示例：提供默认方案和备用方案**
+「用 pdfplumber 提取文本：
 ```python
 import pdfplumber
 ```
 
-For scanned PDFs requiring OCR, use pdf2image with pytesseract instead."
+如果遇到需要 OCR 的扫描版 PDF，就使用 pdf2image 和 pytesseract。」
 ````
 
-## Advanced: Skills with executable code
+## 进阶：含可执行代码的技能
 
-The sections below focus on Skills that include executable scripts. If your Skill uses only markdown instructions, skip to [Checklist for effective Skills](#checklist-for-effective-skills).
+以下各节介绍含可执行脚本的技能。如果技能只包含 Markdown 指令，可以直接跳到[有效技能的检查清单](#checklist-for-effective-skills)。
 
-### Solve, don't punt
+### 在脚本中处理错误
 
-When writing scripts for Skills, handle error conditions rather than punting to the agent.
+为技能编写脚本时，应在脚本中处理错误情况，避免把问题留给代理解决。
 
-**Good example: Handle errors explicitly**:
+**好的示例：显式处理错误**
 
 ```python  theme={null}
 def process_file(path):
@@ -865,80 +857,78 @@ def process_file(path):
         with open(path) as f:
             return f.read()
     except FileNotFoundError:
-        # Create file with default content instead of failing
+        # 文件不存在时，用默认内容创建文件
         print(f"File {path} not found, creating default")
         with open(path, 'w') as f:
             f.write('')
         return ''
     except PermissionError:
-        # Provide alternative instead of failing
+        # 提供可用的备用结果
         print(f"Cannot access {path}, using default")
         return ''
 ```
 
-**Bad example: Punt to the agent**:
+**不佳的示例：把错误留给代理处理**
 
 ```python  theme={null}
 def process_file(path):
-    # Just fail and let the agent figure it out
+    # 直接报错，让代理自行处理
     return open(path).read()
 ```
 
-Configuration parameters should also be justified and documented to avoid "voodoo constants" (Ousterhout's law). If you don't know the right value, how will the agent determine it?
+配置参数也应说明取值依据，避免难以解释的常量（Ousterhout 定律）。如果你都不知道该取什么值，代理又如何判断？
 
-**Good example: Self-documenting**:
+**好的示例：直接说明取值依据**
 
 ```python  theme={null}
-# HTTP requests typically complete within 30 seconds
-# Longer timeout accounts for slow connections
+# HTTP 请求通常在 30 秒内完成
+# 较长的超时能容纳速度慢的连接
 REQUEST_TIMEOUT = 30
 
-# Three retries balances reliability vs speed
-# Most intermittent failures resolve by the second retry
+# 重试三次，在可靠性和速度之间取得平衡
+# 多数间歇性故障到第二次重试时就已恢复
 MAX_RETRIES = 3
 ```
 
-**Bad example: Magic numbers**:
+**不佳的示例：含义不明的数字**
 
 ```python  theme={null}
-TIMEOUT = 47  # Why 47?
-RETRIES = 5   # Why 5?
+TIMEOUT = 47  # 为什么是 47？
+RETRIES = 5   # 为什么是 5？
 ```
 
-### Provide utility scripts
+### 提供工具脚本
 
-Even if your agent could write a script, pre-made scripts offer advantages:
+即使代理能够自己编写脚本，随技能提供现成脚本也有优势：
 
-**Benefits of utility scripts**:
+* 比即时生成的代码可靠。
+* 节省 token，因为无需把代码载入上下文。
+* 节省时间，因为无需生成代码。
+* 保证每次使用的行为一致。
 
-* More reliable than generated code
-* Save tokens (no need to include code in context)
-* Save time (no code generation required)
-* Ensure consistency across uses
+<img src="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=4bbc45f2c2e0bee9f2f0d5da669bad00" alt="将可执行脚本与指令文件一同打包" data-og-width="2048" width="2048" data-og-height="1154" height="1154" data-path="images/agent-skills-executable-scripts.png" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=280&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=9a04e6535a8467bfeea492e517de389f 280w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=560&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=e49333ad90141af17c0d7651cca7216b 560w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=840&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=954265a5df52223d6572b6214168c428 840w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=1100&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=2ff7a2d8f2a83ee8af132b29f10150fd 1100w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=1650&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=48ab96245e04077f4d15e9170e081cfb 1650w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=2500&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=0301a6c8b3ee879497cc5b5483177c90 2500w" />
 
-<img src="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=4bbc45f2c2e0bee9f2f0d5da669bad00" alt="Bundling executable scripts alongside instruction files" data-og-width="2048" width="2048" data-og-height="1154" height="1154" data-path="images/agent-skills-executable-scripts.png" data-optimize="true" data-opv="3" srcset="https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=280&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=9a04e6535a8467bfeea492e517de389f 280w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=560&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=e49333ad90141af17c0d7651cca7216b 560w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=840&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=954265a5df52223d6572b6214168c428 840w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=1100&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=2ff7a2d8f2a83ee8af132b29f10150fd 1100w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=1650&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=48ab96245e04077f4d15e9170e081cfb 1650w, https://mintcdn.com/anthropic-claude-docs/4Bny2bjzuGBK7o00/images/agent-skills-executable-scripts.png?w=2500&fit=max&auto=format&n=4Bny2bjzuGBK7o00&q=85&s=0301a6c8b3ee879497cc5b5483177c90 2500w" />
+上图展示了可执行脚本如何与指令文件配合。指令文件（forms.md）引用脚本，代理可以直接执行，无需把脚本内容载入上下文。
 
-The diagram above shows how executable scripts work alongside instruction files. The instruction file (forms.md) references the script, and the agent can execute it without loading its contents into context.
+在指令中明确告诉代理应如何使用脚本：
 
-**Important distinction**: Make clear in your instructions whether the agent should:
+* **执行脚本**（最常见），例如「运行 `analyze_form.py` 提取字段」。
+* **作为参考读取脚本**（适用于复杂逻辑），例如「字段提取算法见 `analyze_form.py`」。
 
-* **Execute the script** (most common): "Run `analyze_form.py` to extract fields"
-* **Read it as reference** (for complex logic): "See `analyze_form.py` for the field extraction algorithm"
+大多数工具脚本适合直接执行，可靠性和效率都更高。脚本执行方式见下文的[运行环境](#runtime-environment)。
 
-For most utility scripts, execution is preferred because it's more reliable and efficient. See the [Runtime environment](#runtime-environment) section below for details on how script execution works.
-
-**Example**:
+示例：
 
 ````markdown  theme={null}
-## Utility scripts
+## 工具脚本
 
-**analyze_form.py**: Extract all form fields from PDF
+**analyze_form.py**：提取 PDF 中的所有表单字段。
 
 ```bash
 python scripts/analyze_form.py input.pdf > fields.json
 ```
 
-Output format:
+输出格式：
 ```json
 {
   "field_name": {"type": "text", "x": 100, "y": 200},
@@ -946,205 +936,207 @@ Output format:
 }
 ```
 
-**validate_boxes.py**: Check for overlapping bounding boxes
+**validate_boxes.py**：检查边界框是否重叠。
 
 ```bash
 python scripts/validate_boxes.py fields.json
-# Returns: "OK" or lists conflicts
+# 返回 "OK"，或列出冲突
 ```
 
-**fill_form.py**: Apply field values to PDF
+**fill_form.py**：将字段值写入 PDF。
 
 ```bash
 python scripts/fill_form.py input.pdf fields.json output.pdf
 ```
 ````
 
-### Use visual analysis
+### 使用视觉分析
 
-When inputs can be rendered as images, have the agent analyze them:
+如果输入可以渲染为图像，可以让代理分析图像：
 
 ````markdown  theme={null}
-## Form layout analysis
+## 分析表单布局
 
-1. Convert PDF to images:
+1. 将 PDF 转成图像：
    ```bash
    python scripts/pdf_to_images.py form.pdf
    ```
 
-2. Analyze each page image to identify form fields
-3. The agent can see field locations and types visually
+2. 分析每页图像，识别表单字段。
+3. 代理可以直接从图像判断字段的位置和类型。
 ````
 
 <Note>
-  In this example, you'd need to write the `pdf_to_images.py` script.
+  此例中需要自行编写 `pdf_to_images.py` 脚本。
 </Note>
 
-Agent vision capabilities help understand layouts and structures.
+代理的视觉能力可以帮助理解布局和结构。
 
-### Create verifiable intermediate outputs
+### 生成可验证的中间产物
 
-When agents perform complex, open-ended tasks, they can make mistakes. The "plan-validate-execute" pattern catches errors early by having the agent first create a plan in a structured format, then validate that plan with a script before executing it.
+代理执行复杂的开放式任务时，可能出错。先让代理用结构化格式生成计划，再用脚本验证计划，通过后才执行，可以及早发现问题。
 
-**Example**: Imagine asking the agent to update 50 form fields in a PDF based on a spreadsheet. Without validation, it might reference non-existent fields, create conflicting values, miss required fields, or apply updates incorrectly.
+例如，让代理根据电子表格更新 PDF 中的 50 个表单字段。如果没有验证，代理可能引用不存在的字段、产生冲突的值、遗漏必填字段，或用错误的方式应用更新。
 
-**Solution**: Use the workflow pattern shown above (PDF form filling), but add an intermediate `changes.json` file that gets validated before applying changes. The workflow becomes: analyze → **create plan file** → **validate plan** → execute → verify.
+可以沿用上文填写 PDF 表单的流程，再加入一个中间文件 `changes.json`，在应用改动前验证。流程变为分析 → **生成计划文件** → **验证计划** → 执行 → 验证。
 
-**Why this pattern works:**
+这种做法具有以下特点：
 
-* **Catches errors early**: Validation finds problems before changes are applied
-* **Machine-verifiable**: Scripts provide objective verification
-* **Reversible planning**: The agent can iterate on the plan without touching originals
-* **Clear debugging**: Error messages point to specific problems
+* **及早发现错误**，在应用更改之前就能发现问题。
+* **可由机器验证**，脚本可依据客观规则校验。
+* **可以反复调整计划**，代理无需动原始文件。
+* **方便排查**，错误消息能指向具体问题。
 
-**When to use**: Batch operations, destructive changes, complex validation rules, high-stakes operations.
+适用于批量操作、破坏性改动、验证规则复杂的任务，以及后果重大的操作。
 
-**Implementation tip**: Make validation scripts verbose with specific error messages like "Field 'signature\_date' not found. Available fields: customer\_name, order\_total, signature\_date\_signed" to help the agent fix issues.
+编写验证脚本时，报错应具体，例如「找不到字段 'signature_date'。可用字段：customer_name、order_total、signature_date_signed」。代理可以据此修复问题。
 
-### Package dependencies
+### 软件包依赖
 
-Skills run in the code execution environment with platform-specific limitations:
+技能在代码执行环境中运行，不同平台的限制有所不同：
 
-* **claude.ai**: Can install packages from npm and PyPI and pull from GitHub repositories
-* **Anthropic API**: Has no network access and no runtime package installation
+* **claude.ai**：可从 npm 和 PyPI 安装软件包，也可从 GitHub 仓库拉取内容。
+* **Anthropic API**：无法访问网络，也无法在运行时安装软件包。
 
-List required packages in your SKILL.md and verify they're available in the [code execution tool documentation](https://platform.claude.com/docs/en/agents-and-tools/tool-use/code-execution-tool).
+在 SKILL.md 中列出所需的软件包，并通过[代码执行工具文档](https://platform.claude.com/docs/en/agents-and-tools/tool-use/code-execution-tool)确认它们是否可用。
 
-### Runtime environment
+<a id="runtime-environment"></a>
 
-Skills run in a code execution environment with filesystem access, bash commands, and code execution capabilities. For the conceptual explanation of this architecture, see [The Skills architecture](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#the-skills-architecture) in the overview.
+### 运行环境
 
-**How this affects your authoring:**
+技能在代码执行环境中运行，可以访问文件系统、运行 bash 命令并执行代码。相关架构的概念见技能概览中的[技能架构](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#the-skills-architecture)。
 
-**How agents access Skills:**
+代理按以下方式访问技能：
 
-1. **Metadata pre-loaded**: At startup, the name and description from all Skills' YAML frontmatter are loaded into the system prompt
-2. **Files read on-demand**: Agents use their file-reading tools to access SKILL.md and other files from the filesystem when needed
-3. **Scripts executed efficiently**: Utility scripts can be executed via bash without loading their full contents into context. Only the script's output consumes tokens
-4. **No context penalty for large files**: Reference files, data, or documentation don't consume context tokens until actually read
+1. **预加载元数据。** 启动时，所有技能 YAML 前置元数据中的名称和描述都会载入系统提示词。
+2. **按需读取文件。** 代理在需要时使用文件读取工具从文件系统访问 SKILL.md 和其他文件。
+3. **高效执行脚本。** 工具脚本可以通过 bash 执行，无需将完整内容载入上下文。只有脚本输出会消耗 token。
+4. **大型文件按需占用上下文。** 参考文件、数据和文档在实际读取之前不会消耗上下文 token。
 
-* **File paths matter**: Agents navigate your skill directory like a filesystem. Use forward slashes (`reference/guide.md`), not backslashes
-* **Name files descriptively**: Use names that indicate content: `form_validation_rules.md`, not `doc2.md`
-* **Organize for discovery**: Structure directories by domain or feature
-  * Good: `reference/finance.md`, `reference/sales.md`
-  * Bad: `docs/file1.md`, `docs/file2.md`
-* **Bundle comprehensive resources**: Include complete API docs, extensive examples, large datasets; no context penalty until accessed
-* **Prefer scripts for deterministic operations**: Write `validate_form.py` rather than asking the agent to generate validation code
-* **Make execution intent clear**:
-  * "Run `analyze_form.py` to extract fields" (execute)
-  * "See `analyze_form.py` for the extraction algorithm" (read as reference)
-* **Test file access patterns**: Verify the agent can navigate your directory structure by testing with real requests
+编写时，应注意以下几点：
 
-**Example:**
+* **文件路径。** 代理像浏览文件系统一样浏览技能目录。路径一律使用正斜杠（`reference/guide.md`）。
+* **文件名要能说明内容。** 例如用 `form_validation_rules.md`，避免用 `doc2.md`。
+* **方便查找。** 按领域或功能组织目录。
+  * 正确：`reference/finance.md`、`reference/sales.md`。
+  * 不佳：`docs/file1.md`、`docs/file2.md`。
+* **附带完整资料。** 可以附上完整的 API 文档、大量示例和大型数据集。读取之前不占用上下文。
+* **确定性的操作优先用脚本。** 例如直接提供 `validate_form.py`，免去代理生成校验代码。
+* **明确脚本的使用方式。**
+  * 「运行 `analyze_form.py` 提取字段」（执行）。
+  * 「提取算法见 `analyze_form.py`」（作为参考读取）。
+* **测试文件的访问路径。** 用真实请求确认代理能顺利浏览目录结构。
+
+示例：
 
 ```
 bigquery-skill/
-├── SKILL.md (overview, points to reference files)
+├── SKILL.md（概览，指向参考文件）
 └── reference/
-    ├── finance.md (revenue metrics)
-    ├── sales.md (pipeline data)
-    └── product.md (usage analytics)
+    ├── finance.md（营收指标）
+    ├── sales.md（销售漏斗数据）
+    └── product.md（使用情况分析）
 ```
 
-When the user asks about revenue, the agent reads SKILL.md, sees the reference to `reference/finance.md`, and invokes bash to read just that file. The sales.md and product.md files remain on the filesystem, consuming zero context tokens until needed. This filesystem-based model is what enables progressive disclosure. Agents can navigate and selectively load exactly what each task requires.
+用户询问营收时，代理读取 SKILL.md，看到指向 `reference/finance.md` 的引用，再调用 bash 读取该文件。sales.md 和 product.md 会留在文件系统中，只有实际读取时才占用上下文 token。基于文件系统的结构实现了渐进式披露，让代理按每项任务的需要选择要加载的资料。
 
-For complete details on the technical architecture, see [How Skills work](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#how-skills-work) in the Skills overview.
+完整的技术架构见技能概览中的[技能如何运作](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#how-skills-work)。
 
-### MCP tool references
+### 引用 MCP 工具
 
-If your Skill uses MCP (Model Context Protocol) tools, always use fully qualified tool names to avoid "tool not found" errors.
+如果技能使用 MCP（Model Context Protocol）工具，始终使用带服务器前缀的完整工具名，以避免报找不到工具的错误（`tool not found`）。
 
-**Format**: `ServerName:tool_name`
+格式为 `ServerName:tool_name`。
 
-**Example**:
+示例：
 
 ```markdown  theme={null}
-Use the BigQuery:bigquery_schema tool to retrieve table schemas.
-Use the GitHub:create_issue tool to create issues.
+使用 BigQuery:bigquery_schema 工具获取表结构。
+使用 GitHub:create_issue 工具创建议题。
 ```
 
-Where:
+`BigQuery` 和 `GitHub` 是 MCP 服务器名。`bigquery_schema` 和 `create_issue` 是相应服务器中的工具名。
 
-* `BigQuery` and `GitHub` are MCP server names
-* `bigquery_schema` and `create_issue` are the tool names within those servers
+省略服务器前缀时，代理可能找不到工具，尤其是在有多个 MCP 服务器可用时。
 
-Without the server prefix, agents may fail to locate the tool, especially when multiple MCP servers are available.
+### 不要假定工具已经安装
 
-### Avoid assuming tools are installed
-
-Don't assume packages are available:
+明确说明需要哪些软件包。
 
 ````markdown  theme={null}
-**Bad example: Assumes installation**:
-"Use the pdf library to process the file."
+**不佳的示例：假定软件包已安装**
+「用 pdf 库处理文件。」
 
-**Good example: Explicit about dependencies**:
-"Install required package: `pip install pypdf`
+**好的示例：明确说明依赖**
+「安装必需的软件包：`pip install pypdf`
 
-Then use it:
+接下来按以下方式使用：
 ```python
 from pypdf import PdfReader
 reader = PdfReader("file.pdf")
-```"
+```
+」
 ````
 
-## Technical notes
+## 技术说明
 
-### YAML frontmatter requirements
+### YAML 前置元数据要求
 
-The SKILL.md frontmatter requires `name` (64 characters max) and `description` (1024 characters max) fields. See the [Skills overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#skill-structure) for complete structure details.
+SKILL.md 的前置元数据必须包含 `name`（最多 64 字符）和 `description`（最多 1024 字符）。完整结构见[技能概览](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#skill-structure)。
 
-### Token budgets
+### token 预算
 
-Keep SKILL.md body under 500 lines for optimal performance. If your content exceeds this, split it into separate files using the progressive disclosure patterns described earlier. For architectural details, see the [Skills overview](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#how-skills-work).
+为获得最佳效果，将 SKILL.md 正文控制在 500 行以内。如果内容超出此上限，按上文的渐进式披露模式拆分到单独的文件。架构细节见[技能概览](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview#how-skills-work)。
 
-## Checklist for effective Skills
+<a id="checklist-for-effective-skills"></a>
 
-Before sharing a Skill, verify:
+## 有效技能的检查清单
 
-### Core quality
+共享技能之前，请逐项核对。
 
-* [ ] Description is specific and includes key terms
-* [ ] Description includes both what the Skill does and when to use it
-* [ ] SKILL.md body is under 500 lines
-* [ ] Additional details are in separate files (if needed)
-* [ ] No time-sensitive information (or in "old patterns" section)
-* [ ] Consistent terminology throughout
-* [ ] Examples are concrete, not abstract
-* [ ] File references are one level deep
-* [ ] Progressive disclosure used appropriately
-* [ ] Workflows have clear steps
+### 基本质量
 
-### Code and scripts
+* [ ] 描述具体且包含关键词
+* [ ] 描述写明技能用途和适用条件
+* [ ] SKILL.md 正文少于 500 行
+* [ ] 按需将额外细节放进独立文件
+* [ ] 无时效性信息，或已移到「旧用法」一节
+* [ ] 全文术语一致
+* [ ] 示例具体
+* [ ] 从 SKILL.md 到引用文件仅有一层
+* [ ] 恰当地使用渐进式披露
+* [ ] 工作流程有明确的步骤
 
-* [ ] Scripts solve problems rather than punt to the agent
-* [ ] Error handling is explicit and helpful
-* [ ] No "voodoo constants" (all values justified)
-* [ ] Required packages listed in instructions and verified as available
-* [ ] Scripts have clear documentation
-* [ ] No Windows-style paths (all forward slashes)
-* [ ] Validation/verification steps for critical operations
-* [ ] Feedback loops included for quality-critical tasks
+### 代码和脚本
 
-### Testing
+* [ ] 脚本自行处理问题
+* [ ] 错误处理明确，能帮助代理解决问题
+* [ ] 所有常量都说明了取值依据
+* [ ] 指令列出所需软件包，并验证过可用性
+* [ ] 脚本有清晰的文档
+* [ ] 路径全部用正斜杠
+* [ ] 关键操作有验证步骤
+* [ ] 质量要求高的任务有反馈循环
 
-* [ ] At least three evaluations created
-* [ ] Tested with Haiku, Sonnet, and Opus
-* [ ] Tested with real usage scenarios
-* [ ] Team feedback incorporated (if applicable)
+### 测试
 
-## Next steps
+* [ ] 创建了至少三个评估
+* [ ] 用 Haiku、Sonnet 和 Opus 测试过
+* [ ] 用真实场景测试过
+* [ ] 已纳入团队反馈（如适用）
+
+## 后续步骤
 
 <CardGroup cols={2}>
-  <Card title="Get started with Agent Skills" icon="rocket" href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart">
-    Create your first Skill
+  <Card title="Agent Skills 入门" icon="rocket" href="https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart">
+    创建你的第一个技能
   </Card>
 
-  <Card title="Use Skills in Claude Code" icon="terminal" href="https://code.claude.com/docs/en/skills">
-    Create and manage Skills in Claude Code
+  <Card title="在 Claude Code 中使用技能" icon="terminal" href="https://code.claude.com/docs/en/skills">
+    在 Claude Code 中创建和管理技能
   </Card>
 
-  <Card title="Use Skills with the API" icon="code" href="https://platform.claude.com/docs/en/build-with-claude/skills-guide">
-    Upload and use Skills programmatically
+  <Card title="通过 API 使用技能" icon="code" href="https://platform.claude.com/docs/en/build-with-claude/skills-guide">
+    通过程序上传和使用技能
   </Card>
 </CardGroup>

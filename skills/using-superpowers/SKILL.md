@@ -53,12 +53,12 @@ description: Use when starting any conversation - establishes how to find and us
 
 如果你使用的是下列宿主之一，请阅读对应的参考文件，了解该宿主的专用指引。
 
-- Claude Code: `references/claude-code-tools.md`
-- Codex: `references/codex-tools.md`
-- Pi: `references/pi-tools.md`
-- Antigravity: `references/antigravity-tools.md`
-- Hermes Agent: `references/hermes-tools.md`
-- Muse: `references/muse-tools.md`
+- Claude Code： `references/claude-code-tools.md`
+- Codex： `references/codex-tools.md`
+- Pi： `references/pi-tools.md`
+- Antigravity： `references/antigravity-tools.md`
+- Hermes Agent： `references/hermes-tools.md`
+- Muse： `references/muse-tools.md`
 
 ## 用户指令
 

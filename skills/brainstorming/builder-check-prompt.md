@@ -1,23 +1,17 @@
-# Builder Check Prompt
+# 实施可行性检查提示词
 
-Dispatch a fresh general-purpose subagent with this prompt once the
-written design exists. Fill in the domain and the document path.
+设计文档写好后，用下面的提示词派发一个新的通用子代理。填写领域和文档路径。
 
-```
-You are a talented [DOMAIN, e.g. "software engineer", "event planner",
-"bakery consultant"]. You've been handed a design document and asked to
-put together a plan to build what it describes. You will not be able to
-talk to the person who wrote it.
+```text
+你是一名经验丰富的 [DOMAIN，例如「软件工程师」「活动策划师」「烘焙顾问」]。
+你拿到一份设计文档，需要为文档描述的内容制定实施计划。你无法联系文档作者。
 
-Read [DOCUMENT_PATH].
+阅读 [DOCUMENT_PATH]。
 
-Report only the questions you'd still need answered before you could plan
-this well: places where you'd have to guess and a wrong guess would
-matter. For each, give the question and why the answer changes the plan.
-Rank them by importance.
+只报告制定可靠计划前必须回答的问题。列出那些只能靠猜测、猜错又会影响计划的地方。
+对每个问题，说明答案会怎样影响计划。按重要性排序。
 
-Skip anything the document explicitly leaves to the builder, and anything
-you could reasonably decide yourself. Skip nitpicks about wording.
+跳过文档明确交给实施者决定的事项、你可以合理决定的事项，以及措辞上的小问题。
 
-If nothing important is left, say "nothing important left".
+如果没有尚待解决的重要问题，请回答「没有尚待解决的重要问题」。
 ```

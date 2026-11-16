@@ -1,29 +1,15 @@
-Read `prompts/analyst-common.md` first; it gives your role, inputs,
-context-safety rules, and the return format. This file adds the dimension.
+先读 `prompts/analyst-common.md`，明确角色、输入、上下文保护规则和返回格式。本文件说明该分析维度的要求。
 
-Dimension: Plan adherence
+分析维度为计划执行情况。
 
-Recover the plan the session agreed to, then map each plan step to what
-happened. "Plan" here means any agreed course of action, not git commits.
+还原会话中商定的行动方案，并将每个步骤与实际行为对应起来。这里的计划指商定的行动方案。单凭 Git 提交记录无法确定计划。
 
-1. Find the agreed plan: a design or plan agreed in chat (look for the
-   assistant text preceding a human "yes/ok/go ahead"), a spec or plan file
-   written during the session (tool calls that write under `docs/`,
-   `plans/`, `specs/`, or any file the human named), a todo-list record whose
-   meaning was established in the case file, or any numbered checklist in
-   assistant text. Quote each plan step with its `path:line`.
-2. Mark structural events between the plan and its execution: compaction
-   events identified during discovery, resumes, aborted turns, and associated
-   session dispatches. Note their line numbers; plan drift right after one of
-   these is a distinct finding.
-3. For each plan step, find the tool calls and assistant text that
-   executed it, or establish that none did. Report:
-   - steps skipped (no execution found; quote the plan step);
-   - steps executed out of order (line numbers show the order);
-   - steps silently changed (execution differs from the plan step in a
-     way the assistant never announced; quote both);
-   - steps invented (work done that no plan step covers);
-   - drift immediately after a structural event (cite the event line and
-     the first divergent action).
-4. If there is no recoverable plan, say so as the only finding, with
-   the lines you checked.
+1. 找到商定的计划。可能是对话中认可的设计或计划（查找人工回复「是／可以／继续」或 `yes/ok/go ahead` 之前的助手消息），会话中写入的规格或计划文件（查找对 `docs/`、`plans/`、`specs/` 或人工指定文件的写入调用），案例文件已确认含义的待办记录，或助手消息中的编号清单。引用每个计划步骤及其 `path:line`。
+2. 标记从确定计划到执行之间的事件，包括定位会话时识别出的上下文压缩事件、会话恢复、轮次中止和关联会话派发。记下行号。紧接此类事件发生的计划偏离应单列为一条发现。
+3. 针对每个计划步骤，找到实施该步骤的工具调用和助手消息，或确认没有执行记录。报告以下情况。
+   - 跳过的步骤。未找到执行记录，引用计划步骤。
+   - 执行顺序错误的步骤。用行号说明先后顺序。
+   - 擅自变更的步骤。执行与计划不同，助手始终未说明变动。分别引用计划和执行记录。
+   - 自行增加的步骤。所做的工作不在任何计划步骤之内。
+   - 紧接上述事件发生的偏离。引用事件行和第一次偏离的操作。
+4. 如果无法还原任何计划，只报告这一条发现，并列出核查过的行。

@@ -1,31 +1,13 @@
-# Discover the session history
+# 定位会话历史
 
-Resolve the session your human partner named using the tools and information
-available in this environment. Your knowledge can suggest where to look; verify
-the result against the actual history.
+利用当前环境提供的工具和信息，定位与你协作的人指定的会话。已有知识可以帮助确定查找方向，结果须对照实际会话历史核实。
 
-Use the harness's exposed session tools, configured storage, local help,
-documentation, or bounded filesystem inspection. Measure files before reading
-their content and follow context-safety.md. Inspect archives or indexes when the
-environment points to them. A supplied usable path does not need another search.
+可使用宿主开放的会话工具、已配置的存储位置、本地帮助、文档，或限制范围的文件系统检查。读取文件内容前先测量，并遵循 `context-safety.md`。如果环境指向归档或索引，也要检查。如果已经提供了可用路径，直接使用。
 
-Confirm identity using the available session id, working directory, timestamps,
-and matching conversation content. Recency alone is not confirmation. Distinguish
-the requested session from its children and unrelated candidates. Ask for a
-missing identifying fact when the available evidence cannot distinguish them.
+根据现有的会话 ID、工作目录、时间戳和匹配的对话内容确认身份。时间接近只能作为线索。区分所请求的会话、它的子会话和无关候选。现有证据无法区分时，询问缺少的识别信息。
 
-For each filesystem source, obtain its full absolute path from the environment,
-with home-directory shorthand and variables expanded. Use that same path in the
-case record and in the discovery answer you give your human partner.
+对每个文件系统来源，从实际环境中取得完整的绝对路径，展开主目录简写和变量。在案例记录中和告知对方的定位结果中使用同一路径。
 
-Establish the record meanings needed for the requested investigation from
-observed records or documentation. Distinguish human messages from injected
-messages, tool results, and a parent agent's dispatch. Match tool calls to their
-results. Establish usage-counter semantics before calculating totals. Do not
-infer a format from another harness or turn a missing field into a zero.
+根据观察到的记录或文档，确认调查所需的记录含义。区分人工消息、注入消息、工具结果和父代理的派发消息。将工具调用与对应结果匹配。计算合计前，先确认用量计数器的含义。禁止套用其他宿主的格式，缺失字段也不得按零处理。
 
-Record the exact sources, relevant field meanings, supporting record locations,
-associated sessions, rejected plausible candidates, and unresolved information
-in the case file. Subsequent readers use that record rather than repeating
-discovery. If history is missing, inaccessible, or ambiguous, state the specific
-limitation and ask for the missing path, export, or identifying detail.
+在案例文件中记下准确来源、相关字段的含义、支持判断的记录位置、关联会话、已排除的合理候选和待确认的信息。后续读取者直接使用这份记录，避免重复定位。历史记录缺失、不可访问或存在歧义时，说明具体限制，并询问缺少的路径、导出文件或识别信息。

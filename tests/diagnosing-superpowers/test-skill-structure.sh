@@ -29,18 +29,18 @@ if [ -f "$SKILL_MD" ]; then
     fail "frontmatter name is diagnosing-superpowers"
   fi
   description="$(printf '%s\n' "$frontmatter" | awk '/^description:/{sub(/^description:[ ]*/,""); print; found=1; next} found && /^[ ]/{print} found && !/^[ ]/{exit}' | tr '\n' ' ')"
-  if printf '%s' "$description" | grep -q '^Use when'; then
-    pass "description starts with 'Use when'"
+  if printf '%s' "$description" | grep -q '^适用于'; then
+    pass "description starts with '适用于'"
   else
-    fail "description starts with 'Use when' (got: ${description:0:60})"
+    fail "description starts with '适用于' (got: ${description:0:60})"
   fi
   if [ "${#description}" -le 1024 ]; then
     pass "description under 1024 characters"
   else
     fail "description under 1024 characters (${#description})"
   fi
-  for banned in "dispatch" "then" "step"; do
-    if printf '%s' "$description" | grep -qiw "$banned"; then
+  for banned in "派发" "然后" "步骤"; do
+    if printf '%s' "$description" | grep -qF "$banned"; then
       fail "description contains workflow word '$banned'"
     else
       pass "description avoids workflow word '$banned'"
@@ -56,7 +56,7 @@ if [ -f "$SKILL_MD" ]; then
   fi
 
   # --- required sections --------------------------------------------------
-  for heading in "## Hard rules" "## Red Flags"; do
+  for heading in "## 硬性规则" "## 警示信号"; do
     if grep -q "^$heading" "$SKILL_MD"; then
       pass "SKILL.md has section '$heading'"
     else

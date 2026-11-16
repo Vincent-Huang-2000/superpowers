@@ -1,28 +1,16 @@
-Read `prompts/analyst-common.md` first; it gives your role, inputs,
-context-safety rules, and the return format. This file adds the dimension.
+先读 `prompts/analyst-common.md`，明确角色、输入、上下文保护规则和返回格式。本文件说明该分析维度的要求。
 
-Dimension: Stumbles
+分析维度为执行受阻。
 
-Find every point where the session stopped going forward.
+找出会话推进受阻的每一处。
 
-Sources, each using the case file's evidenced record meanings and extraction
-commands to locate line numbers:
-- tool results marked as errors, non-zero exits, or explicit failure records;
-- shell commands that failed (non-zero exit in the result, "command not
-  found", "No such file");
-- retries: the same tool call re-issued within the same turn after an
-  error;
-- reverted edits: an edit followed by an edit that restores the earlier
-  content, or `git checkout`/`git restore`/`git revert`/`git reset` on a
-  file the session touched;
-- backtracking in assistant text ("actually", "let me instead", "that was
-  wrong", "I misread");
-- human corrections: a human prompt that contradicts or corrects the
-  assistant's immediately preceding action;
-- permission denials, hook failures, API errors, rate limits, aborted turns,
-  and context overflow or compaction triggered mid-task.
+使用案例文件中有证据支持的记录含义和提取命令，定位以下各类事件的行号。
+- 标记为错误的工具结果、非零退出，以及明确的失败记录。
+- 失败的 Shell 命令，例如结果中的退出码非零，或出现 `command not found`、`No such file`。
+- 重试。同一轮中在报错后再次发出同一工具调用。
+- 撤销编辑。某次编辑后又有编辑恢复了原先内容，或对会话改过的文件执行了 `git checkout`、`git restore`、`git revert`、`git reset`。
+- 助手在消息中改变原先判断或做法，例如「其实」「我改用」「那样不对」「我看错了」，或 `actually`、`let me instead`、`that was wrong`、`I misread`。
+- 人工纠正。人工提示反驳或纠正助手紧邻的上一项操作。
+- 权限被拒、钩子失败、API 错误、请求限额、轮次中止，以及任务进行中触发的上下文溢出或压缩。
 
-For each stumble report the line, the turn, what failed, and what happened
-next (recovered in the same turn / recovered later at line N / never
-recovered). Group identical repeated failures into one finding with a
-count.
+对每处受阻情况，报告行号、轮次、哪里出了问题以及后续情况（同轮恢复、随后在第 N 行恢复、始终未恢复）。完全相同的反复失败合并为一条发现，并记录次数。

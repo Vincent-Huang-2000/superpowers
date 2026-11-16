@@ -1,30 +1,18 @@
-Read `prompts/analyst-common.md` first; it gives your role, inputs,
-context-safety rules, and the return format. This file adds the dimension.
+先读 `prompts/analyst-common.md`，明确角色、输入、上下文保护规则和返回格式。本文件说明该分析维度的要求。
 
-Dimension: Repeated work
+分析维度为重复工作。
 
-Find work the session did more than once.
+找出会话做过不止一次的工作。
 
-1. Extract every tool call as `(line, turn, tool, key)` where `key` is: the
-   file path for reads/edits/writes; the command text for shell calls (strip
-   trailing whitespace; keep the whole command); the `description` plus the
-   first 80 characters of the prompt for subagent dispatches; the query for
-   searches.
-2. Group by `(tool, key)` and report the groups at or over threshold:
+1. 将每次工具调用提取为 `(line, turn, tool, key)`。读取、编辑和写入的 `key` 为文件路径。Shell 调用使用命令全文，只移除末尾空白。派发子代理使用 `description` 加提示的前 80 字符。搜索使用查询内容。
+2. 按 `(tool, key)` 分组，报告达到或超过阈值的组。
 
-   | Category | Threshold | Exempt |
+   | 类别 | 阈值 | 例外 |
    |---|---|---|
-   | reads, searches | 3 | |
-   | edits | 2 | |
-   | shell commands | 2 | status checks and test runs (`git status`, `ls`, `pwd`, test runners) |
-   | subagent dispatches | 2 with the same description | |
-3. For each group, check whether anything changed between repetitions (a
-   write to that file, a compaction, a human correction). Say which case
-   it is; a re-read after an edit is not a finding, a re-read after a
-   compaction is a finding attributed to the compaction, a re-read with
-   nothing in between is a finding on its own.
-4. Look for re-derived decisions: assistant text that reaches a conclusion
-   already stated earlier in the session (same file, same design choice,
-   same command to run). Quote both places.
-5. One finding per group, with the first and last line numbers and the
-   count.
+   | 读取、搜索 | 3 | |
+   | 编辑 | 2 | |
+   | Shell 命令 | 2 | 状态检查和测试运行（`git status`、`ls`、`pwd`、测试运行器） |
+   | 派发子代理 | 相同描述出现 2 次 | |
+3. 对每组检查重复之间是否发生了变化，例如写入该文件、上下文压缩或人工纠正。说明实际情况。编辑后重新读取无需报告。压缩后重新读取应报告，并归因于压缩。两次读取之间什么都没发生，则单独作为一条发现。
+4. 查找重复推导的决定。助手消息是否再次得出会话中已明确的结论，例如同一个文件、同一项设计选择或同一条待运行命令？引用两处内容。
+5. 每组一条发现，注明首末行号及次数。

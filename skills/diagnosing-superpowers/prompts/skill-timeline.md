@@ -1,30 +1,16 @@
-Read `prompts/analyst-common.md` first; it gives your role, inputs,
-context-safety rules, and the return format. This file adds the dimension.
+先读 `prompts/analyst-common.md`，明确角色、输入、上下文保护规则和返回格式。本文件说明该分析维度的要求。
 
-Dimension: Skill timeline
+分析维度为技能时间线。
 
-Build the per-human-turn record of skill and plugin use, then look for gaps.
+按人工提示轮次记录技能和插件的使用情况，并检查有无遗漏。
 
-1. List the human prompts with line numbers and timestamps.
-2. Using the skill-invocation and attribution meanings established in the case
-   file, list every explicit invocation, active-skill attribution, or read of a
-   file named `SKILL.md`. Record the line, the skill name, and the human turn it
-   happened in.
-3. List every non-superpowers plugin, skill, agent type, MCP server, or
-   hook used. Use only the evidenced tool, attribution, agent-dispatch, MCP,
-   and hook meanings recorded in the case file; identify values associated
-   with something other than `superpowers`.
-4. For each human turn, compare the request text against the trigger
-   descriptions of the superpowers skills installed (read
-   `<install root>/skills/*/SKILL.md` frontmatter `description` lines; the
-   install root is in the case file). Report as findings:
-   - a skill invoked, with the request that preceded it (one finding per
-     invocation is fine when there are few; group by skill when many);
-   - a turn whose request matches a skill's trigger description with no
-     invocation in that turn (state which description matched and quote
-     the request);
-   - a skill invoked one or more turns after the matching request (late);
-   - each non-superpowers plugin/skill/tool used, with where.
+1. 列出人工提示及其行号和时间戳。
+2. 依据案例文件已确认的技能调用和归属记录的含义，列出每次显式调用、标明当前生效技能的归属记录，以及每次对名为 `SKILL.md` 的文件的读取。记录行号、技能名称和所在的人工提示轮次。
+3. 列出使用过的所有非 Superpowers 插件、技能、代理类型、MCP 服务器或钩子。只依据案例文件中有证据支持的工具、归属、代理派发、MCP 和钩子记录含义，识别属于 `superpowers` 之外的值。
+4. 对每个人工提示轮次，将请求文本与已安装的 Superpowers 技能的触发条件对照。读取 `<install root>/skills/*/SKILL.md` 的前置元数据中的 `description` 行，安装根目录见案例文件。报告以下发现。
+   - 已调用的技能及其调用前的请求。调用较少时可以每次调用各写一条发现，次数多时按技能归组。
+   - 请求与某项技能的触发条件匹配，但该轮未调用。说明与哪条描述匹配，并引用请求。
+   - 匹配请求后隔了一轮或多轮才调用的技能，标明调用晚了。
+   - 每个用到的非 Superpowers 插件、技能或工具，以及使用位置。
 
-Do not say whether a missed or late trigger was wrong. Report the match
-and the absence; the reader decides.
+报告请求满足了哪些触发条件，以及何时没有调用。是否有误由读者判断。

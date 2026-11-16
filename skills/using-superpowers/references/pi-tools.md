@@ -1,16 +1,16 @@
-# Pi Tool Mapping
+# Pi 工具映射
 
-Skills speak in actions ("dispatch a subagent", "create a todo", "read a file"). On Pi these resolve to the tools below.
+技能以「派发子代理」「创建待办」「读取文件」之类的操作描述流程。在 Pi 中使用下表所列的工具。
 
-| Action skills request | Pi equivalent |
+| 技能要求的操作 | Pi 对应工具 |
 | --- | --- |
-| Dispatch a subagent (`Subagent (general-purpose):` template) | Use an installed subagent tool such as `subagent` from `pi-subagents` if available |
-| Task tracking ("create a todo", "mark complete") | Use an installed todo/task tool if available, otherwise track tasks in the plan or `TODO.md` |
+| 派发子代理（`Subagent (general-purpose):` 模板） | 使用已安装的子代理工具，例如 `pi-subagents` 中的 `subagent` |
+| 跟踪任务（创建待办、标记完成） | 若有待办或任务工具则使用它，否则在计划或 `TODO.md` 中记录 |
 
-## Subagents
+## 子代理
 
-Pi core does not ship a standard subagent tool. The `pi-subagents` package is a strong optional companion and provides a `subagent` tool with single-agent, chain, parallel, async, forked-context, and resume/status workflows. If no subagent tool is available, do not fabricate `Task` calls; execute sequentially in the current session or explain that the optional subagent capability is not installed.
+Pi 核心没有内置的子代理工具。可选扩展 `pi-subagents` 提供 `subagent` 工具，支持单代理、链式、并行、异步、会话分叉及恢复和查看状态。如果没有子代理工具，就在当前会话按顺序执行，或说明尚未安装可选的子代理功能。
 
-## Task lists
+## 任务清单
 
-Pi core does not ship a standard task-list tool. If a todo/task extension is installed, use its documented tool. Otherwise use Superpowers plan files, checklists in Markdown, or a repo-local `TODO.md` for task tracking. Older Superpowers docs may refer to `TodoWrite`; treat that as the task-tracking action above.
+Pi 核心没有内置的任务清单工具。若安装了待办或任务扩展，按扩展文档使用其工具。否则用 Superpowers 计划文件、Markdown 清单或仓库内的 `TODO.md` 跟踪任务。旧版 Superpowers 文档中的 `TodoWrite` 对应上面的跟踪任务操作。

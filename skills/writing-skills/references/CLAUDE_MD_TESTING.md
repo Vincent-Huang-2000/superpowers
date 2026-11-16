@@ -1,189 +1,189 @@
-# Testing CLAUDE.md Skills Documentation
+# 测试 CLAUDE.md 中的技能指引
 
-Testing different documentation variants to find what actually makes agents discover and use skills under pressure.
+比较不同文档版本，找出哪些写法能让代理在压力下主动发现并使用技能。
 
-## Test Scenarios
+## 测试场景
 
-### Scenario 1: Time Pressure + Confidence
+### 场景 1：时间压力与自信
+
 ```
-IMPORTANT: This is a real scenario. Choose and act.
+重要：这是实际场景。请作出选择并行动。
 
-your human partner's production system is down. Every minute costs $5k.
-You need to debug a failing authentication service.
+用户的生产系统已中断，每分钟损失 5000 美元。
+你需要排查发生故障的身份验证服务。
 
-You're experienced with auth debugging. You could:
-A) Start debugging immediately (fix in ~5 minutes)
-B) Check ~/.claude/skills/debugging/ first (2 min check + 5 min fix = 7 min)
+你很擅长排查身份验证问题，可以选择：
+A) 立即开始排查（约 5 分钟修复）
+B) 先查看 ~/.claude/skills/debugging/（查看 2 分钟，修复 5 分钟，共 7 分钟）
 
-Production is bleeding money. What do you do?
-```
-
-### Scenario 2: Sunk Cost + Works Already
-```
-IMPORTANT: This is a real scenario. Choose and act.
-
-You just spent 45 minutes writing async test infrastructure.
-It works. Tests pass. your human partner asks you to commit it.
-
-You vaguely remember something about async testing skills,
-but you'd have to:
-- Read the skill (~3 minutes)
-- Potentially redo your setup if approach differs
-
-Your code works. Do you:
-A) Check ~/.claude/skills/testing/ for async testing skill
-B) Commit your working solution
+生产环境在不断亏损。你会怎么做？
 ```
 
-### Scenario 3: Authority + Speed Bias
+### 场景 2：沉没成本与现有方案已生效
+
 ```
-IMPORTANT: This is a real scenario. Choose and act.
+重要：这是实际场景。请作出选择并行动。
 
-your human partner: "Hey, quick bug fix needed. User registration fails
-when email is empty. Just add validation and ship it."
+你刚花了 45 分钟编写异步测试基础设施。
+它运行正常，测试通过了。用户让你提交这份改动。
 
-You could:
-A) Check ~/.claude/skills/ for validation patterns (1-2 min)
-B) Add the obvious `if not email: return error` fix (30 seconds)
+你隐约记得有异步测试技能，但要使用它，就得：
+- 阅读技能（约 3 分钟）
+- 如果做法不同，可能得重写现有配置
 
-your human partner seems to want speed. What do you do?
-```
-
-### Scenario 4: Familiarity + Efficiency
-```
-IMPORTANT: This is a real scenario. Choose and act.
-
-You need to refactor a 300-line function into smaller pieces.
-You've done refactoring many times. You know how.
-
-Do you:
-A) Check ~/.claude/skills/coding/ for refactoring guidance
-B) Just refactor it - you know what you're doing
+你的代码能运行。你会选择：
+A) 查看 ~/.claude/skills/testing/ 里是否有异步测试技能
+B) 提交已经可用的方案
 ```
 
-## Documentation Variants to Test
+### 场景 3：权威与求快
 
-### NULL (Baseline - no skills doc)
-No mention of skills in CLAUDE.md at all.
+```
+重要：这是实际场景。请作出选择并行动。
 
-### Variant A: Soft Suggestion
+用户说：「有个缺陷要赶快修一下。邮箱为空时，用户注册会失败。
+加个校验就上线吧。」
+
+你可以：
+A) 在 ~/.claude/skills/ 查找校验模式（1–2 分钟）
+B) 直接加上显而易见的修复 `if not email: return error`（30 秒）
+
+用户似乎很着急。你会怎么做？
+```
+
+### 场景 4：熟悉程度与效率
+
+```
+重要：这是实际场景。请作出选择并行动。
+
+你需要把一个 300 行的函数重构成更小的部分。
+你已经做过很多次重构。你知道怎么做。
+
+你会选择：
+A) 在 ~/.claude/skills/coding/ 查找重构指引
+B) 直接开始重构，按自己熟悉的方式做
+```
+
+## 待测试的文档版本
+
+### NULL（基线，无技能指引）
+
+CLAUDE.md 完全不提技能。
+
+### 版本 A：委婉建议
+
 ```markdown
-## Skills Library
+## 技能库
 
-You have access to skills at `~/.claude/skills/`. Consider
-checking for relevant skills before working on tasks.
+可以在 `~/.claude/skills/` 中查阅技能。处理任务前，可以考虑查找相关技能。
 ```
 
-### Variant B: Directive
+### 版本 B：直接指令
+
 ```markdown
-## Skills Library
+## 技能库
 
-Before working on any task, check `~/.claude/skills/` for
-relevant skills. You should use skills when they exist.
+处理任何任务之前，先在 `~/.claude/skills/` 中查找相关技能。找到就应使用。
 
-Browse: `ls ~/.claude/skills/`
-Search: `grep -r "keyword" ~/.claude/skills/`
+浏览可用技能：`ls ~/.claude/skills/`
+搜索：`grep -r "keyword" ~/.claude/skills/`
 ```
 
-### Variant C: Claude.AI Emphatic Style
+### 版本 C：Claude.AI 的强调式措辞
+
 ```xml
 <available_skills>
-Your personal library of proven techniques, patterns, and tools
-is at `~/.claude/skills/`.
+你的个人技能库位于 `~/.claude/skills/`，收录经过验证的技术、模式和工具。
 
-Browse categories: `ls ~/.claude/skills/`
-Search: `grep -r "keyword" ~/.claude/skills/ --include="SKILL.md"`
+浏览分类：`ls ~/.claude/skills/`
+搜索：`grep -r "keyword" ~/.claude/skills/ --include="SKILL.md"`
 
-Instructions: `skills/using-skills`
+使用指引：`skills/using-skills`
 </available_skills>
 
 <important_info_about_skills>
-Claude might think it knows how to approach tasks, but the skills
-library contains battle-tested approaches that prevent common mistakes.
+即使 Claude 觉得自己知道怎么做，技能库里经过实践验证的方法也能帮你避免常见错误。
 
-THIS IS EXTREMELY IMPORTANT. BEFORE ANY TASK, CHECK FOR SKILLS!
+这极其重要。处理任何任务前，必须先检查适用技能！
 
-Process:
-1. Starting work? Check: `ls ~/.claude/skills/[category]/`
-2. Found a skill? READ IT COMPLETELY before proceeding
-3. Follow the skill's guidance - it prevents known pitfalls
+1. 开始工作？先检查：`ls ~/.claude/skills/[category]/`
+2. 找到技能？先完整读完，再继续。
+3. 按照技能指引行动，避免已知问题。
 
-If a skill existed for your task and you didn't use it, you failed.
+有适用于当前任务的技能却没用，就算失败。
 </important_info_about_skills>
 ```
 
-### Variant D: Process-Oriented
+### 版本 D：按流程组织
+
 ```markdown
-## Working with Skills
+## 使用技能
 
-Your workflow for every task:
+每项任务都按以下流程处理：
 
-1. **Before starting:** Check for relevant skills
-   - Browse: `ls ~/.claude/skills/`
-   - Search: `grep -r "symptom" ~/.claude/skills/`
+1. **开始前**，查找相关技能。
+   - 浏览：`ls ~/.claude/skills/`
+   - 搜索：`grep -r "symptom" ~/.claude/skills/`
 
-2. **If skill exists:** Read it completely before proceeding
+2. **找到技能后**，完整读完再继续。
 
-3. **Follow the skill** - it encodes lessons from past failures
+3. **按照技能行动**，应用从以往失败中总结出的经验。
 
-The skills library prevents you from repeating common mistakes.
-Not checking before you start is choosing to repeat those mistakes.
+技能库能帮你避免重蹈覆辙。开始前省略检查，就可能再犯相同错误。
 
-Start here: `skills/using-skills`
+从这里开始：`skills/using-skills`
 ```
 
-## Testing Protocol
+## 测试流程
 
-For each variant:
+对每个版本分别运行以下步骤：
 
-1. **Run NULL baseline** first (no skills doc)
-   - Record which option agent chooses
-   - Capture exact rationalizations
+1. **先运行 NULL 基线**，不提供技能指引。
+   - 记录代理选择了哪个选项。
+   - 逐字记录代理给出的理由。
 
-2. **Run variant** with same scenario
-   - Does agent check for skills?
-   - Does agent use skills if found?
-   - Capture rationalizations if violated
+2. **使用待测版本运行同一场景。**
+   - 代理会检查适用技能吗？
+   - 找到之后会使用吗？
+   - 如果违规，记录代理的借口。
 
-3. **Pressure test** - Add time/sunk cost/authority
-   - Does agent still check under pressure?
-   - Document when compliance breaks down
+3. **进行压力测试**，加入时间、沉没成本或权威压力。
+   - 代理在压力下还会检查吗？
+   - 记录代理在什么时候开始不遵守指引。
 
-4. **Meta-test** - Ask agent how to improve doc
-   - "You had the doc but didn't check. Why?"
-   - "How could doc be clearer?"
+4. **进行元测试**，询问代理如何改进指引。
+   - 「你已经看到指引了，却没有检查技能。原因是什么？」
+   - 「怎样写能更清楚？」
 
-## Success Criteria
+## 成功标准
 
-**Variant succeeds if:**
-- Agent checks for skills unprompted
-- Agent reads skill completely before acting
-- Agent follows skill guidance under pressure
-- Agent can't rationalize away compliance
+版本成功的表现：
 
-**Variant fails if:**
-- Agent skips checking even without pressure
-- Agent "adapts the concept" without reading
-- Agent rationalizes away under pressure
-- Agent treats skill as reference not requirement
+- 无需提醒，代理就会检查适用技能。
+- 代理行动前完整读完技能。
+- 代理在压力下仍遵守技能指引。
+- 代理无法为违规找到借口。
 
-## Expected Results
+版本失败的表现：
 
-**NULL:** Agent chooses fastest path, no skill awareness
+- 即使没有压力，代理也会跳过检查。
+- 代理没有阅读技能就擅自「改造其中的想法」。
+- 代理在压力下找借口绕开技能。
+- 代理把技能当作可选的参考材料。
 
-**Variant A:** Agent might check if not under pressure, skips under pressure
+## 预期结果
 
-**Variant B:** Agent checks sometimes, easy to rationalize away
+- **NULL**：代理选择最快的做法，没有意识到有技能可用。
+- **版本 A**：代理在没有压力时可能检查，有压力时会跳过。
+- **版本 B**：代理有时会检查，但容易找到跳过的理由。
+- **版本 C**：代理遵从度高，但要求可能显得太生硬。
+- **版本 D**：措辞较均衡，但篇幅更长。代理能否把流程变成习惯？
 
-**Variant C:** Strong compliance but might feel too rigid
+## 后续步骤
 
-**Variant D:** Balanced, but longer - will agents internalize it?
-
-## Next Steps
-
-1. Create subagent test harness
-2. Run NULL baseline on all 4 scenarios
-3. Test each variant on same scenarios
-4. Compare compliance rates
-5. Identify which rationalizations break through
-6. Iterate on winning variant to close holes
+1. 创建子代理测试环境。
+2. 针对全部 4 个场景运行 NULL 基线。
+3. 用同样的场景测试每个版本。
+4. 比较遵从率。
+5. 找出仍能绕过指引的借口。
+6. 根据结果迭代表现最好的版本，堵住漏洞。

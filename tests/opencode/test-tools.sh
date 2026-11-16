@@ -87,9 +87,9 @@ echo ""
 echo "Test 3: Testing native skill tool with a superpowers skill..."
 echo "  Running opencode with brainstorming skill..."
 
-run_opencode output "$TEST_HOME/test-project" "Call the skill tool with name \"brainstorming\". Then tell me the loaded skill title."
+run_opencode output "$TEST_HOME/test-project" "Call the skill tool with name \"brainstorming\". Then quote the loaded skill title verbatim."
 assert_contains "$output" '"name":"brainstorming"' "native skill tool loaded bundled brainstorming skill"
-assert_contains "$output" "Brainstorming Ideas Into Designs" "brainstorming skill content was returned"
+assert_contains "$output" "构思" "brainstorming skill content was returned"
 
 echo ""
 echo "=== All native skill tool tests passed ==="

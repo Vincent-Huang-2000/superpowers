@@ -8,7 +8,7 @@
 # git. A skill-relative path invites the agent to cd into the skill's own
 # directory (the plugin cache) to make the path work, which puts the
 # helpers outside the working tree it is executing in (#2429). Every such
-# reference must carry the phrase "by its absolute path" within a few
+# reference must carry the phrase "绝对路径" (absolute path) within a few
 # lines after it.
 #
 # Usage: tests/sdd-helper-paths/test-sdd-helper-paths.sh
@@ -21,7 +21,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 # optional ../<skill>/ prefix, then scripts/<helper>. Absolute paths ($S/...,
 # /...) don't match.
 invocation='`(bash )?(\.\./[a-z-]+/)?scripts/(sdd-workspace|task-brief|review-package|task-start|task-done)'
-phrase='by its absolute path'
+phrase='绝对路径'
 
 failed=0
 checked=0

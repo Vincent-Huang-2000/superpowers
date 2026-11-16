@@ -1,28 +1,12 @@
-Read `prompts/analyst-common.md` first; it gives your role, inputs,
-context-safety rules, and the return format. This file adds the dimension.
+先读 `prompts/analyst-common.md`，明确角色、输入、上下文保护规则和返回格式。本文件说明该分析维度的要求。
 
-Dimension: Cost and time
+分析维度为费用和耗时。
 
-Account for where tokens and wall-clock went.
+核算 token 用到了哪里，实际耗时花在了哪里。
 
-1. Tokens. Use only the usage records and counter meanings established in the
-   case file. State whether each counter is incremental or cumulative before
-   calculating totals; difference cumulative observations without turning a
-   missing observation into zero. Report the five turns with the largest
-   supported totals and the supported totals per associated session.
-2. Wall-clock. Use the evidenced timestamp fields, event boundaries, and units
-   recorded in the case file. Report the five longest supported turns and any
-   gap longer than ten minutes between consecutive events (idle, waiting on an
-   associated session, or waiting on your human partner; say which only when
-   the records show it).
-3. Largest tool results: use the case file's evidenced tool-result records to
-   report the ten largest results with their tool and turn. Measure records
-   before extracting bounded content.
-4. Compactions: count and locate records whose meaning as compaction events was
-   established during discovery. Report available before/after counters and
-   what the session was doing when each fired; mark unsupported fields absent.
-5. Associated sessions: count them and report supported usage, duration, and
-   dispatching turn for each.
-6. Report the turns, subagents, tools, or repeats that dominate the
-   totals, with numbers. Do not speculate about why a
-   turn was expensive beyond what the transcript shows.
+1. **Token 用量。** 只使用案例文件中已确认的用量记录和计数器含义。计算合计前，说明各计数器记录的是增量还是累计值。累计值须用观测值相减求增量，缺失的观测值不得按零处理。报告可由证据支持的用量最高的五个轮次，以及各关联会话的用量合计。
+2. **实际耗时。** 使用案例文件中有证据支持的时间戳字段、事件边界和单位。报告可核实的耗时最长的五个轮次，以及相邻事件之间所有超过十分钟的间隔。只有记录能够区分时，才标明当时是空闲、等待关联会话，还是等待与你协作的人。
+3. **最大的工具结果。** 根据案例文件中有证据支持的工具结果记录，按大小报告前十条及对应的工具和轮次。先测量记录大小，再限制提取范围。
+4. **上下文压缩。** 统计并定位在会话发现阶段确认是压缩事件的记录。报告可取得的压缩前后计数器值，以及每次触发压缩时会话正在做什么。将缺少证据的字段标为缺失。
+5. **关联会话。** 统计总数，逐个报告可核实的用量、时长及发起派发的轮次。
+6. 以数字说明哪些轮次、子代理、工具或重复操作占了大部分用量或耗时。对于某轮费用高昂的原因，结论须以会话记录为限。

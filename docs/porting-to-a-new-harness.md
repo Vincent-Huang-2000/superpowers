@@ -710,7 +710,8 @@ Then:
     unrecognized.
   - **Otherwise lean on the installed `using-superpowers` skill itself.** If the
     harness surfaces each installed skill's name + description at session start,
-    the `using-superpowers` description ("Use when starting any conversation…")
+    the `using-superpowers` description ("适用于开始任何对话时…", meaning
+    "Use when starting any conversation…")
     can prompt the model to load it — installing the skill *is* the bootstrap.
     Softer (no guaranteed wrapper; it carries triggering but not the tool mapping
     — see Step 5), so prefer the declared context file when available.
