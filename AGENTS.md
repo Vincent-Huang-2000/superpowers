@@ -14,6 +14,34 @@ Superpowers 将一套开发工作流打包给多个编程助手使用。各宿�
 - `skills/<技能名>/SKILL.md` 定义技能。开头的 `name` 和 `description` 供宿主发现技能，正文定义具体步骤。同目录可包含按需读取的 `references/`、提示模板，以及被技能调用的 `scripts/`。 [示例技能](skills/brainstorming/SKILL.md)
 - `skills/using-superpowers/SKILL.md` 说明何时检查和调用技能。`skills/using-superpowers/references/` 集中记录宿主工具和能力的差异。调整工作流时先看对应技能，调整宿主工具用法时先看该宿主的映射。 [启动技能](skills/using-superpowers/SKILL.md) · [工具映射](skills/using-superpowers/references/)
 
+#### 技能索引
+
+按当前任务选择技能，通过宿主提供的方式加载对应 `SKILL.md`，再按正文引用读取后续技能、模板或参考文档。技能正文中的 `superpowers:<技能名>` 指向下表对应的技能。
+
+| 技能 | 何时使用 |
+| --- | --- |
+| [using-superpowers](skills/using-superpowers/SKILL.md) | 会话开始时，确定如何发现、选择和调用适用技能。 |
+| [brainstorming](skills/brainstorming/SKILL.md) | 设计新功能或调整行为前，澄清需求、比较方案并确认设计。 |
+| [writing-plans](skills/writing-plans/SKILL.md) | 已有设计或需求时，把多步骤工作拆成可执行、可验证的计划。 |
+| [using-git-worktrees](skills/using-git-worktrees/SKILL.md) | 开始需要隔离的开发工作或准备执行计划时，检查现有工作区或准备 worktree。 |
+| [executing-plans](skills/executing-plans/SKILL.md) | 用户选择由当前会话执行计划，或宿主没有子代理工具时。 |
+| [subagent-driven-development](skills/subagent-driven-development/SKILL.md) | 选择由子代理执行实施计划时，逐项派发实现和独立审查。 |
+| [dispatching-parallel-agents](skills/dispatching-parallel-agents/SKILL.md) | 有两个或更多任务可以独立处理，且没有共享状态或顺序依赖时。 |
+| [test-driven-development](skills/test-driven-development/SKILL.md) | 实现功能或修复缺陷时，先写失败测试，再实现并重构。 |
+| [systematic-debugging](skills/systematic-debugging/SKILL.md) | 遇到缺陷、测试失败或意外行为时，先复现并定位根因，再提出修复。 |
+| [requesting-code-review](skills/requesting-code-review/SKILL.md) | 完成任务、实现主要功能或准备合并时，整理变更范围并发起独立审查。 |
+| [receiving-code-review](skills/receiving-code-review/SKILL.md) | 收到审查意见后，先核实其含义和适用性，再处理反馈。 |
+| [verification-before-completion](skills/verification-before-completion/SKILL.md) | 声明工作完成、缺陷已修复或测试通过前，运行相关检查并读取结果。 |
+| [finishing-a-development-branch](skills/finishing-a-development-branch/SKILL.md) | 实现完成且检查通过后，处理合并、PR、保留分支或清理等收尾选项。 |
+| [writing-skills](skills/writing-skills/SKILL.md) | 编写、修改技能或验证技能行为时。 |
+| [diagnosing-superpowers](skills/diagnosing-superpowers/SKILL.md) | 排查 Superpowers 会话中的技能未触发、计划被跳过、重复工作等问题，或整理缺陷报告时。 |
+
+#### 常见交接路径
+
+- 新增功能或调整行为时，用 `brainstorming` 确认设计后交给 `writing-plans`。计划确认后，按用户选择和宿主能力进入 `executing-plans` 或 `subagent-driven-development`。两种执行方式都会通过 `using-git-worktrees` 检查工作区，并在最终审查通过后进入 `finishing-a-development-branch`。
+- 修复缺陷时，从 `systematic-debugging` 开始，定位根因后用 `test-driven-development` 补复现测试并修复，最后用 `verification-before-completion` 核实结果。
+- 发起代码审查时用 `requesting-code-review`，收到反馈后用 `receiving-code-review` 核实和处理。
+
 ### 宿主的安装与加载入口
 
 | 宿主 | 入口与加载方式 |
